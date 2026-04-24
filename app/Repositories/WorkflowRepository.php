@@ -16,9 +16,6 @@ class WorkflowRepository
         $this->orderApproval = $orderApproval;
     }
 
-    /**
-     * دریافت همه مراحل workflow بر اساس ترتیب
-     */
     public function getWorkflowSteps()
     {
         return $this->workflowStep
@@ -27,21 +24,15 @@ class WorkflowRepository
             ->get();
     }
 
-    /**
-     * دریافت approvalهای یک سفارش
-     */
     public function getOrderApprovals(int $orderId)
     {
         return $this->orderApproval
-            ->with(['step', 'approvedBy'])
+            ->with(['step', 'actionBy'])
             ->where('order_id', $orderId)
             ->orderBy('id')
             ->get();
     }
 
-    /**
-     * بروزرسانی وضعیت یک approval
-     */
     public function updateApprovalStatus(int $approvalId, string $status, ?int $userId = null, ?string $description = null)
     {
         $approval = $this->orderApproval->findOrFail($approvalId);
@@ -59,9 +50,6 @@ class WorkflowRepository
         return $approval;
     }
 
-    /**
-     * پیدا کردن approval خاص
-     */
     public function findApproval(int $id)
     {
         return $this->orderApproval->findOrFail($id);

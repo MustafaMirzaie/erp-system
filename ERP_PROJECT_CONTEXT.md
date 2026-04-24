@@ -391,16 +391,32 @@ Repositoryها به ساختار واقعی مدل‌ها و MySQL نزدیک ش
 
 
 
+---
+
+
+
+## 📍 Update – CustomerRepositoryTest Passed & Next Phase Started
+
+✔ تمام 4 تست CustomerRepositoryTest با موفقیت پاس شد
+✔ FK migrations جداگانه به دلیل incompatibility با SQLite in-memory حذف شد
+✔ ساختار تست‌نویسی پروژه تثبیت شد
+✔ OrderRepositoryTest آماده اجرا شد
+
+نتیجه:
+لایه Repository برای Customer تست‌شده و آماده است. مرحله بعد تست Order است.
+
+
 
 ---
 
 
 
-## 📍 Update – Foreign Key Migrations Added Manually
+## 📍 Update – Repository Layer Fully Tested
 
-✔ migrationهای FK به‌صورت جداگانه ساخته شدند
-✔ فایل‌های migration در پروژه تخصیص داده شدند
-✔ آخرین وضعیت پروژه در ERP_PROJECT_CONTEXT.md و erp-system.zip ذخیره شد
+✔ تمام 5 Repository تست شد و همه 22 تست پاس شدند
+✔ migration جدول companies اضافه شد (علت: فراموش شده بود)
+✔ باگ نام relation در WorkflowRepository اصلاح شد (approvedBy → actionBy)
+✔ مجموع: 22 passed / 43 assertions / 0.52s
 
 نتیجه:
-الان نوبت بازنویسی تمیز Modelهاست و سپس برگشت به CustomerRepositoryTest.php
+لایه Repository کاملاً پوشش تست دارد و آماده استفاده در Service Layer است.
