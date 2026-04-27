@@ -420,3 +420,41 @@ Repositoryها به ساختار واقعی مدل‌ها و MySQL نزدیک ش
 
 نتیجه:
 لایه Repository کاملاً پوشش تست دارد و آماده استفاده در Service Layer است.
+
+
+
+---
+
+
+
+## 📍 Update – Sanctum API Authentication Completed
+
+✔ Laravel Sanctum نصب و تنظیم شد
+✔ migration های موجود از طریق tinker در جدول migrations ثبت شدند (بدون اجرای مجدد)
+✔ HasApiTokens trait به مدل User اضافه شد
+✔ AuthController با سه endpoint پیاده‌سازی شد (login, logout, me)
+✔ routes/api.php با prefix v1 تنظیم شد
+✔ AuthTest با 6 تست کامل پاس شد
+✔ مجموع کل: 34 passed / 74 assertions / 0.80s
+
+نتیجه:
+لایه Authentication آماده است. API با token-based auth کار می‌کند و
+قابل استفاده از هر client (موبایل، وب، اپ دیگر) است.
+
+
+
+---
+
+
+
+## 📍 Update – Order API Endpoints Completed
+
+✔ OrderController با سه endpoint پیاده‌سازی شد (index, store, show)
+✔ Validation کامل برای ایجاد سفارش اضافه شد
+✔ routes/api.php با Order routes بروز شد
+✔ OrderApiTest با 7 تست کامل پاس شد
+✔ مجموع کل: 41 passed / 99 assertions / 0.82s
+
+نتیجه:
+API سفارش آماده است. کاربر احراز هویت شده می‌تواند
+سفارش ایجاد کند، لیست بگیرد و جزئیات ببیند.
