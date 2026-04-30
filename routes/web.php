@@ -3,17 +3,37 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 });
 
-use App\Models\Order;
+Route::get('/login', function () {
+    return view('auth.login');
+});
 
-Route::get('/test-order', function () {
-    $order = Order::first();
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
 
-    if (!$order) {
-        return 'No orders found in database!';
-    }
+Route::get('/orders', function () {
+    return view('orders.index');
+});
 
-    return $order->load(['customer','items','approvals']);
+Route::get('/orders/create', function () {
+    return view('orders.create');
+});
+
+Route::get('/orders/{id}', function ($id) {
+    return view('orders.show', ['id' => $id]);
+});
+
+Route::get('/customers', function () {
+    return view('customers.index');
+});
+
+Route::get('/products', function () {
+    return view('products.index');
+});
+
+Route::get('/workflow', function () {
+    return view('workflow.index');
 });

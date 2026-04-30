@@ -458,3 +458,64 @@ Repositoryها به ساختار واقعی مدل‌ها و MySQL نزدیک ش
 نتیجه:
 API سفارش آماده است. کاربر احراز هویت شده می‌تواند
 سفارش ایجاد کند، لیست بگیرد و جزئیات ببیند.
+
+
+
+---
+
+
+
+## 📍 Update – Product & Workflow API Completed
+
+✔ ProductController با index و show پیاده‌سازی شد
+✔ WorkflowService با منطق approve/reject و auto-status سفارش پیاده‌سازی شد
+✔ WorkflowController با 4 endpoint پیاده‌سازی شد
+✔ routes/api.php کامل شد (تمام endpoint ها)
+✔ ProductApiTest با 5 تست پاس شد
+✔ WorkflowApiTest با 6 تست پاس شد
+✔ مجموع کل: 59 passed / 151 assertions
+
+نتیجه:
+تمام API های backend آماده است:
+- Auth (login/logout/me)
+- Orders (list/create/show)
+- Customers (list/search/show/addresses)
+- Products (list/search/show)
+- Workflow (steps/approvals/approve/reject)
+
+
+
+----
+
+
+
+## 📍 Update – Login Page & Dashboard Completed
+
+✔ صفحه login با Skote template پیاده‌سازی شد
+✔ فایل‌های assets از Skote به public/ کپی شدند
+✔ login با API و localStorage token کار می‌کند
+✔ redirect به dashboard بعد از login انجام می‌شود
+✔ logout با حذف token و redirect به login کار می‌کند
+✔ user admin در دیتابیس ساخته شد
+
+نتیجه:
+Frontend login آماده است و به API وصل می‌شود.
+
+
+
+----
+
+
+
+## 📍 Update – Main Layout & Dashboard Completed
+
+✔ Layout اصلی Skote با sidebar و header ساخته شد
+✔ سیستم Blade layout با @extends و @yield پیاده‌سازی شد
+✔ داشبورد با کارت‌های آمار و جدول سفارش‌ها آماده شد
+✔ اتصال داشبورد به API با token authentication
+✔ نمایش نام کاربر در header
+✔ logout از header کار می‌کند
+✔ routes برای تمام صفحات تعریف شد
+
+نتیجه:
+Layout اصلی آماده است. داده‌های واقعی از API نمایش داده می‌شود.

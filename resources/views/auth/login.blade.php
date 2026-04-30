@@ -39,7 +39,7 @@
                             <a href="#" class="auth-logo-dark">
                                 <div class="avatar-md profile-user-wid mb-4">
                                         <span class="avatar-title rounded-circle bg-light">
-                                            <img src="{{ asset('assets/images/logo.svg') }}" alt="" class="rounded-circle" height="34">
+                                            <img src="{{ asset('assets/images/logo.svg') }}" alt="" class="rounded-circle" height="55">
                                         </span>
                                 </div>
                             </a>
@@ -98,15 +98,18 @@
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // نمایش/مخفی رمز عبور
-    document.getElementById('password-addon').addEventListener('click', function() {
+    document.getElementById('password-addon').addEventListener('click', function () {
         const pwd = document.getElementById('password');
         const icon = this.querySelector('i');
-        if (pwd.type === 'password') {
-            pwd.type = 'text';
-            icon.classList.replace('mdi-eye-outline', 'mdi-eye-off-outline');
+
+        if (pwd.getAttribute('type') === 'password') {
+            pwd.setAttribute('type', 'text');
+            icon.classList.remove('mdi-eye-outline');
+            icon.classList.add('mdi-eye-off-outline');
         } else {
-            pwd.type = 'password';
-            icon.classList.replace('mdi-eye-off-outline', 'mdi-eye-outline');
+            pwd.setAttribute('type', 'password');
+            icon.classList.remove('mdi-eye-off-outline');
+            icon.classList.add('mdi-eye-outline');
         }
     });
 
