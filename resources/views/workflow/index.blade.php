@@ -166,13 +166,18 @@
         document.getElementById('approve-btn').addEventListener('click', function() {
             if (!currentApprovalId) return;
             const description = document.getElementById('approval-description').value;
+            this.disabled = true;
 
             apiCall(`/api/v1/workflow/approvals/${currentApprovalId}/approve`, {
                 method: 'POST',
                 body: JSON.stringify({ description })
             }).then(data => {
                 bootstrap.Modal.getInstance(document.getElementById('approvalModal')).hide();
-                location.reload();
+                showToast('سفارش با موفقیت تایید شد', 'success');
+                setTimeout(() => location.reload(), 1500);
+            }).catch(() => {
+                showToast('خطا در تایید سفارش', 'error');
+                this.disabled = false;
             });
         });
 
@@ -180,13 +185,18 @@
         document.getElementById('reject-btn').addEventListener('click', function() {
             if (!currentApprovalId) return;
             const description = document.getElementById('approval-description').value;
+            this.disabled = true;
 
             apiCall(`/api/v1/workflow/approvals/${currentApprovalId}/reject`, {
                 method: 'POST',
                 body: JSON.stringify({ description })
             }).then(data => {
                 bootstrap.Modal.getInstance(document.getElementById('approvalModal')).hide();
-                location.reload();
+                showToast('سفارش رد شد', 'warning');
+                setTimeout(() => location.reload(), 1500);
+            }).catch(() => {
+                showToast('خطا در رد سفارش', 'error');
+                this.disabled = false;
             });
         });
     </script>

@@ -10,10 +10,8 @@
                 <div class="card-body">
                     <h4 class="card-title mb-4">فرم ثبت سفارش</h4>
 
-                    <!-- Alert -->
                     <div id="alert-box" style="display:none;"></div>
 
-                    <!-- مشتری -->
                     <div class="mb-3">
                         <label class="form-label">مشتری <span class="text-danger">*</span></label>
                         <select class="form-select" id="customer-select">
@@ -21,7 +19,6 @@
                         </select>
                     </div>
 
-                    <!-- شرکت -->
                     <div class="mb-3">
                         <label class="form-label">شرکت <span class="text-danger">*</span></label>
                         <select class="form-select" id="company-select">
@@ -29,7 +26,6 @@
                         </select>
                     </div>
 
-                    <!-- آدرس -->
                     <div class="mb-3">
                         <label class="form-label">آدرس تحویل <span class="text-danger">*</span></label>
                         <select class="form-select" id="address-select" disabled>
@@ -37,7 +33,6 @@
                         </select>
                     </div>
 
-                    <!-- گیرنده -->
                     <div class="mb-3">
                         <label class="form-label">گیرنده <span class="text-danger">*</span></label>
                         <select class="form-select" id="contact-select" disabled>
@@ -45,7 +40,6 @@
                         </select>
                     </div>
 
-                    <!-- رسمی/غیررسمی -->
                     <div class="mb-3">
                         <label class="form-label">نوع سفارش</label>
                         <div class="form-check form-switch">
@@ -56,10 +50,8 @@
 
                     <hr>
 
-                    <!-- آیتم‌های سفارش -->
                     <h5 class="mb-3">آیتم‌های سفارش</h5>
                     <div id="items-container">
-                        <!-- آیتم اول -->
                         <div class="item-row row g-2 mb-2" data-index="0">
                             <div class="col-md-5">
                                 <select class="form-select product-select">
@@ -86,12 +78,10 @@
 
                     <hr>
 
-                    <!-- مجموع -->
                     <div class="text-end mb-3">
                         <h5>مجموع کل: <span id="total-display" class="text-primary">0 ریال</span></h5>
                     </div>
 
-                    <!-- دکمه ثبت -->
                     <div class="d-grid">
                         <button type="button" class="btn btn-primary waves-effect waves-light" id="submit-btn">
                             <span class="normal-text"><i class="bx bx-save me-1"></i> ثبت سفارش</span>
@@ -117,12 +107,8 @@
             });
         });
 
-        // بارگذاری شرکت‌ها (از API نداریم، موقت hardcode)
-        // TODO: اضافه کردن company API
-        fetch('/api/v1/orders', {
-            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('erp_token'), 'Accept': 'application/json' }
-        }).then(r => r.json()).then(orders => {
-            const companies = [...new Map(orders.map(o => [o.company?.id, o.company])).values()].filter(Boolean);
+        // بارگذاری شرکت‌ها از API
+        apiCall('/api/v1/companies').then(companies => {
             const sel = document.getElementById('company-select');
             companies.forEach(c => {
                 sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
@@ -146,7 +132,7 @@
             });
         }
 
-        // وقتی مشتری انتخاب شد
+        // انتخاب مشتری → بارگذاری آدرس‌ها
         document.getElementById('customer-select').addEventListener('change', function() {
             const customerId = this.value;
             const addressSel = document.getElementById('address-select');
@@ -157,7 +143,10 @@
             contactSel.innerHTML = '<option value="">-- ابتدا آدرس انتخاب کنید --</option>';
             contactSel.disabled = true;
 
-            if (!customerId) return;
+            if (!customerId) {
+                addressSel.innerHTML = '<option value="">-- ابتدا مشتری انتخاب کنید --</option>';
+                return;
+            }
 
             apiCall(`/api/v1/customers/${customerId}/addresses`).then(addrs => {
                 addresses = addrs;
@@ -169,7 +158,7 @@
             });
         });
 
-        // وقتی آدرس انتخاب شد
+        // انتخاب آدرس → بارگذاری گیرنده‌ها
         document.getElementById('address-select').addEventListener('change', function() {
             const addressId = parseInt(this.value);
             const contactSel = document.getElementById('contact-select');
@@ -180,11 +169,13 @@
             if (!addressId) return;
 
             const address = addresses.find(a => a.id === addressId);
-            if (address && address.contacts) {
+            if (address && address.contacts && address.contacts.length > 0) {
                 address.contacts.forEach(c => {
-                    contactSel.innerHTML += `<option value="${c.id}">${c.full_name} - ${c.mobile || ''}</option>`;
+                    contactSel.innerHTML += `<option value="${c.id}">${c.full_name}${c.mobile ? ' - ' + c.mobile : ''}</option>`;
                 });
                 contactSel.disabled = false;
+            } else {
+                contactSel.innerHTML = '<option value="">گیرنده‌ای یافت نشد</option>';
             }
         });
 
@@ -219,14 +210,11 @@
             updateTotal();
         });
 
-        // وقتی محصول انتخاب شد قیمت پایه رو بیار
         function bindItemEvents(row) {
             row.querySelector('.product-select').addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
                 const price = opt.dataset.price;
-                if (price) {
-                    row.querySelector('.price-input').value = price;
-                }
+                if (price) row.querySelector('.price-input').value = price;
                 updateTotal();
             });
             row.querySelector('.quantity-input').addEventListener('input', updateTotal);
@@ -237,7 +225,6 @@
             });
         }
 
-        // bind اولین آیتم
         bindItemEvents(document.querySelector('.item-row'));
 
         function updateTotal() {
@@ -257,9 +244,9 @@
             alertBox.style.display = 'none';
 
             const customerId = document.getElementById('customer-select').value;
-            const companyId = document.getElementById('company-select').value;
-            const addressId = document.getElementById('address-select').value;
-            const contactId = document.getElementById('contact-select').value;
+            const companyId  = document.getElementById('company-select').value;
+            const addressId  = document.getElementById('address-select').value;
+            const contactId  = document.getElementById('contact-select').value;
             const isOfficial = document.getElementById('is-official').checked;
 
             if (!customerId || !companyId || !addressId || !contactId) {
@@ -272,13 +259,9 @@
             let hasError = false;
             document.querySelectorAll('.item-row').forEach(row => {
                 const productId = row.querySelector('.product-select').value;
-                const quantity = parseInt(row.querySelector('.quantity-input').value);
-                const price = parseFloat(row.querySelector('.price-input').value);
-
-                if (!productId || !quantity || !price) {
-                    hasError = true;
-                    return;
-                }
+                const quantity  = parseInt(row.querySelector('.quantity-input').value);
+                const price     = parseFloat(row.querySelector('.price-input').value);
+                if (!productId || !quantity || !price) { hasError = true; return; }
                 items.push({ product_id: parseInt(productId), quantity, price });
             });
 
@@ -288,7 +271,6 @@
                 return;
             }
 
-            // loading
             const btn = this;
             btn.disabled = true;
             btn.querySelector('.normal-text').style.display = 'none';
@@ -298,15 +280,16 @@
                 method: 'POST',
                 body: JSON.stringify({
                     customer_id: parseInt(customerId),
-                    company_id: parseInt(companyId),
-                    address_id: parseInt(addressId),
-                    contact_id: parseInt(contactId),
+                    company_id:  parseInt(companyId),
+                    address_id:  parseInt(addressId),
+                    contact_id:  parseInt(contactId),
                     is_official: isOfficial,
                     items
                 })
             }).then(data => {
                 if (data.id) {
-                    window.location.href = '/orders/' + data.id;
+                    showToast('سفارش با موفقیت ثبت شد', 'success');
+                    setTimeout(() => window.location.href = '/orders/' + data.id, 1000);
                 } else {
                     alertBox.style.display = 'block';
                     alertBox.innerHTML = `<div class="alert alert-danger">${data.message || 'خطا در ثبت سفارش'}</div>`;

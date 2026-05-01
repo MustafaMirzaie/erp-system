@@ -9,6 +9,10 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/app-rtl.min.css') }}" rel="stylesheet" type="text/css" />
     @stack('styles')
+    <style>
+        .toast-container { position: fixed; top: 20px; left: 20px; z-index: 9999; }
+        .sidebar-active { background-color: rgba(255,255,255,0.1); border-radius: 4px; }
+    </style>
 </head>
 
 <body data-sidebar="dark">
@@ -28,6 +32,10 @@
 </div>
 
 <div id="layout-wrapper">
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+        <div id="toast-box"></div>
+    </div>
 
     <!-- Header -->
     <header id="page-topbar">
@@ -36,18 +44,18 @@
                 <div class="navbar-brand-box">
                     <a href="/dashboard" class="logo logo-dark">
                             <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo.svg') }}" alt="لوگو" height="22">
+                                <img src="{{ asset('assets/images/logo.svg') }}" alt="لوگو" height="30">
                             </span>
                         <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="لوگو" height="17">
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="لوگو" height="45">
                             </span>
                     </a>
                     <a href="/dashboard" class="logo logo-light">
                             <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo-light.svg') }}" alt="لوگو" height="22">
+                                <img src="{{ asset('assets/images/logo-light.svg') }}" alt="لوگو" height="30">
                             </span>
                         <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="لوگو" height="19">
+                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="لوگو" height="45">
                             </span>
                     </a>
                 </div>
@@ -220,6 +228,39 @@
             }
         }).then(res => res.json());
     };
+
+    // Toast notification
+    window.showToast = function(message, type = 'success') {
+        const colors = {
+            'success': 'bg-success',
+            'error':   'bg-danger',
+            'warning': 'bg-warning',
+            'info':    'bg-info',
+        };
+        const id = 'toast-' + Date.now();
+        const html = `
+        <div id="${id}" class="toast align-items-center text-white ${colors[type]} border-0 mb-2 show"
+            role="alert" style="min-width:280px;">
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    onclick="document.getElementById('${id}').remove()"></button>
+            </div>
+        </div>`;
+        document.getElementById('toast-box').insertAdjacentHTML('beforeend', html);
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }, 4000);
+    };
+
+    // Active menu item
+    document.querySelectorAll('#side-menu a').forEach(link => {
+        if (link.href === window.location.href) {
+            link.classList.add('sidebar-active');
+            link.closest('li')?.classList.add('mm-active');
+        }
+    });
 </script>
 
 @stack('scripts')
