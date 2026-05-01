@@ -10,33 +10,22 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-
-            $table->unsignedBigInteger('customer_id');
-            $table->unsignedBigInteger('company_id');
-            $table->unsignedBigInteger('address_id');
-            $table->unsignedBigInteger('contact_id');
-
-            $table->boolean('is_official')->default(1);
+            $table->string('order_number')->nullable();
+            $table->unsignedBigInteger('customer_id')->index();
+            $table->unsignedBigInteger('company_id')->index();
+            $table->unsignedBigInteger('address_id')->index();
+            $table->unsignedBigInteger('contact_id')->index();
+            $table->boolean('is_official')->default(true);
+            $table->date('issue_date')->nullable();
+            $table->date('send_date')->nullable();
+            $table->unsignedBigInteger('freight_type_id')->nullable();
+            $table->decimal('freight_amount', 15, 2)->default(0);
+            $table->text('payment_terms')->nullable();
+            $table->text('notes')->nullable();
             $table->decimal('total_price', 15, 2)->nullable();
-
-            $table->enum('status', [
-                'draft',
-                'pending',
-                'approved',
-                'rejected',
-                'revision'
-            ])->default('draft');
-
-            $table->unsignedBigInteger('created_by');
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected', 'revision'])->default('draft');
+            $table->unsignedBigInteger('created_by')->index();
             $table->timestamp('created_at')->useCurrent();
-
-            // Indexes مطابق dump
-            $table->index('customer_id', 'idx_orders_customer');
-            $table->index('status', 'idx_orders_status');
-            $table->index('company_id');
-            $table->index('address_id');
-            $table->index('contact_id');
-            $table->index('created_by');
         });
     }
 

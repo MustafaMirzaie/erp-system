@@ -5,7 +5,6 @@
 
 @section('content')
     <div class="row">
-        <!-- اطلاعات اصلی سفارش -->
         <div class="col-xl-8">
             <div class="card">
                 <div class="card-body">
@@ -38,7 +37,7 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <p class="text-muted mb-1">رسمی / غیررسمی</p>
+                            <p class="text-muted mb-1">نوع سفارش</p>
                             <h6 id="is-official">-</h6>
                         </div>
                         <div class="col-md-6">
@@ -47,7 +46,23 @@
                         </div>
                     </div>
 
-                    <!-- آیتم‌های سفارش -->
+                    <!-- کارشناسان فروش -->
+                    <div id="sales-section" style="display:none;">
+                        <h5 class="mt-4 mb-3">کارشناسان فروش</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>کارشناس</th>
+                                    <th>درصد مشارکت</th>
+                                </tr>
+                                </thead>
+                                <tbody id="sales-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- آیتم‌ها -->
                     <h5 class="mt-4 mb-3">آیتم‌های سفارش</h5>
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle mb-0">
@@ -74,7 +89,6 @@
             </div>
         </div>
 
-        <!-- وضعیت گردش کار -->
         <div class="col-xl-4">
             <div class="card">
                 <div class="card-body">
@@ -117,7 +131,6 @@
             'revision': '<span class="badge bg-info">ویرایش</span>',
         };
 
-        // بارگذاری سفارش
         apiCall(`/api/v1/orders/${orderId}`).then(order => {
             document.getElementById('order-id').textContent = '#' + order.id;
             document.getElementById('order-status').innerHTML = statusMap[order.status] || order.status;
@@ -130,6 +143,17 @@
                 ? new Date(order.created_at).toLocaleDateString('fa-IR') : '-';
             document.getElementById('total-price').textContent = order.total_price
                 ? Number(order.total_price).toLocaleString('fa-IR') + ' ریال' : '-';
+
+            // کارشناسان فروش
+            if (order.sales && order.sales.length > 0) {
+                document.getElementById('sales-section').style.display = 'block';
+                document.getElementById('sales-table').innerHTML = order.sales.map(s => `
+                <tr>
+                    <td>${s.user?.full_name || '-'}</td>
+                    <td>${s.share_percent}%</td>
+                </tr>
+            `).join('');
+            }
 
             // آیتم‌ها
             const tbody = document.getElementById('items-table');
@@ -147,7 +171,7 @@
             }
         });
 
-        // بارگذاری approvals
+        // approvals
         apiCall(`/api/v1/workflow/orders/${orderId}/approvals`).then(approvals => {
             const list = document.getElementById('approvals-list');
             if (approvals.length === 0) {
@@ -160,7 +184,9 @@
                 ${approvals.map(a => `
                     <li class="event-list">
                         <div class="event-timeline-dot">
-                            <i class="bx bx-right-arrow-circle font-size-18 ${a.status === 'approved' ? 'text-success' : a.status === 'rejected' ? 'text-danger' : ''}"></i>
+                            <i class="bx bx-right-arrow-circle font-size-18
+                                ${a.status === 'approved' ? 'text-success' : a.status === 'rejected' ? 'text-danger' : 'text-warning'}">
+                            </i>
                         </div>
                         <div class="d-flex">
                             <div class="flex-grow-1">

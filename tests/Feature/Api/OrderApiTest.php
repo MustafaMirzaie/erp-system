@@ -160,7 +160,7 @@ class OrderApiTest extends TestCase
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/v1/orders', $this->orderPayload());
 
-        $response->assertStatus(201)
-            ->assertJsonPath('total_price', '1000000.00');
+        $response->assertStatus(201);
+        $this->assertEquals(1000000, $response->json('total_price'));
     }
 }

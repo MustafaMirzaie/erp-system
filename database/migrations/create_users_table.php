@@ -13,11 +13,10 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('username')->unique();
             $table->string('password');
-            $table->unsignedBigInteger('role_id');
+            $table->unsignedBigInteger('role_id')->index();
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->longText('avatar')->nullable();
             $table->timestamp('created_at')->useCurrent();
-
-            $table->index('role_id');
         });
     }
 

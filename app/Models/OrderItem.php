@@ -6,37 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
-    protected $table = 'order_items';
-
     public $timestamps = false;
 
     protected $fillable = [
         'order_id',
         'product_id',
+        'packaging_type_id',
+        'unit_id',
         'quantity',
+        'amount',
         'base_price',
         'discount_percent',
         'commission_percent',
         'jump_percent',
         'final_price',
+        'tax_percent',
     ];
 
-    protected $casts = [
-        'quantity' => 'integer',
-        'base_price' => 'decimal:2',
-        'discount_percent' => 'decimal:2',
-        'commission_percent' => 'decimal:2',
-        'jump_percent' => 'decimal:2',
-        'final_price' => 'decimal:2',
-    ];
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
-
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
+    public function product()       { return $this->belongsTo(Product::class); }
+    public function packagingType() { return $this->belongsTo(PackagingType::class); }
+    public function unit()          { return $this->belongsTo(Unit::class); }
+    public function order()         { return $this->belongsTo(Order::class); }
 }

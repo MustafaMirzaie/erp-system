@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Order;
+use App\Models\OrderApproval;
+use App\Models\OrderSale;
+use App\Models\WorkflowStep;
 use App\Repositories\OrderRepository;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -35,26 +39,51 @@ class OrderService
                 'created_by'  => auth()->id(),
             ]);
 
-            if (isset($data['items'])) {
-                foreach ($data['items'] as $item) {
-                    $order->items()->create([
-                        'product_id'  => $item['product_id'],
-                        'quantity'    => $item['quantity'],
-                        'base_price'  => $item['price'],        // ← اضافه شد
-                        'final_price' => $item['price'] * $item['quantity'],
-                    ]);
-                }
+            // آیتم‌ها
+            foreach ($data['items'] as $item) {
+                $order->items()->create([
+                    'product_id'  => $item['product_id'],
+                    'quantity'    => $item['quantity'],
+                    'base_price'  => $item['price'],
+                    'final_price' => $item['price'] * $item['quantity'],
+                ]);
             }
 
             $order->total_price = $order->items()->sum('final_price');
             $order->save();
 
+            // کارشناسان فروش
+            if (!empty($data['sales'])) {
+                foreach ($data['sales'] as $sale) {
+                    OrderSale::create([
+                        'order_id'      => $order->id,
+                        'user_id'       => $sale['user_id'],
+                        'share_percent' => $sale['share_percent'],
+                    ]);
+                }
+            }
+
+            // ساخت خودکار approval برای هر مرحله workflow
+            $steps = WorkflowStep::orderBy('step_order')->get();
+            foreach ($steps as $step) {
+                OrderApproval::create([
+                    'order_id' => $order->id,
+                    'step_id'  => $step->id,
+                    'status'   => 'pending',
+                ]);
+            }
+
             DB::commit();
-            return $order->load('items');
+            return $order->load(['items', 'sales.user']);
 
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function getPendingOrders()
+    {
+        return $this->orders->getPendingOrders();
     }
 }

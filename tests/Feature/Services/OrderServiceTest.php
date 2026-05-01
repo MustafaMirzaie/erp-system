@@ -10,6 +10,7 @@ use App\Models\CustomerAddress;
 use App\Models\CustomerContact;
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\WorkflowStep;
 use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,19 +27,20 @@ class OrderServiceTest extends TestCase
     protected CustomerAddress $address;
     protected CustomerContact $contact;
     protected Product $product;
+    protected Role $role;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->service = app(OrderService::class);
 
-        $role = Role::create(['name' => 'فروش']);
+        $this->role = Role::create(['name' => 'فروش']);
 
         $this->user = User::create([
             'full_name' => 'کاربر تست',
             'username'  => 'order_user',
             'password'  => bcrypt('password'),
-            'role_id'   => $role->id,
+            'role_id'   => $this->role->id,
             'status'    => 'active',
         ]);
 
@@ -61,14 +63,12 @@ class OrderServiceTest extends TestCase
             'status'     => 'active',
         ]);
 
-        // لاگین کاربر برای auth()->id()
         $this->actingAs($this->user);
     }
 
-    #[Test]
-    public function it_creates_order_with_items()
+    private function makeOrderData(array $override = []): array
     {
-        $data = [
+        return array_merge([
             'customer_id' => $this->customer->id,
             'company_id'  => $this->company->id,
             'address_id'  => $this->address->id,
@@ -81,9 +81,13 @@ class OrderServiceTest extends TestCase
                     'price'      => 500000,
                 ],
             ],
-        ];
+        ], $override);
+    }
 
-        $order = $this->service->createOrder($data);
+    #[Test]
+    public function it_creates_order_with_items()
+    {
+        $order = $this->service->createOrder($this->makeOrderData());
 
         $this->assertInstanceOf(Order::class, $order);
         $this->assertDatabaseHas('orders', [
@@ -91,31 +95,20 @@ class OrderServiceTest extends TestCase
             'status'      => 'pending',
         ]);
         $this->assertDatabaseHas('order_items', [
-            'order_id'    => $order->id,
-            'product_id'  => $this->product->id,
-            'quantity'    => 2,
+            'order_id'   => $order->id,
+            'product_id' => $this->product->id,
+            'quantity'   => 2,
         ]);
     }
 
     #[Test]
     public function it_calculates_total_price_correctly()
     {
-        $data = [
-            'customer_id' => $this->customer->id,
-            'company_id'  => $this->company->id,
-            'address_id'  => $this->address->id,
-            'contact_id'  => $this->contact->id,
-            'is_official' => true,
+        $order = $this->service->createOrder($this->makeOrderData([
             'items' => [
-                [
-                    'product_id' => $this->product->id,
-                    'quantity'   => 3,
-                    'price'      => 500000,
-                ],
+                ['product_id' => $this->product->id, 'quantity' => 3, 'price' => 500000],
             ],
-        ];
-
-        $order = $this->service->createOrder($data);
+        ]));
 
         $this->assertEquals(1500000, $order->total_price);
     }
@@ -129,43 +122,52 @@ class OrderServiceTest extends TestCase
             'status'     => 'active',
         ]);
 
-        $data = [
-            'customer_id' => $this->customer->id,
-            'company_id'  => $this->company->id,
-            'address_id'  => $this->address->id,
-            'contact_id'  => $this->contact->id,
-            'is_official' => true,
+        $order = $this->service->createOrder($this->makeOrderData([
             'items' => [
                 ['product_id' => $this->product->id, 'quantity' => 2, 'price' => 500000],
                 ['product_id' => $product2->id,      'quantity' => 5, 'price' => 200000],
             ],
-        ];
-
-        $order = $this->service->createOrder($data);
+        ]));
 
         $this->assertCount(2, $order->items);
-        $this->assertEquals(2000000, $order->total_price); // 1000000 + 1000000
+        $this->assertEquals(2000000, $order->total_price);
     }
 
     #[Test]
     public function it_retrieves_order_with_relations()
     {
-        $data = [
-            'customer_id' => $this->customer->id,
-            'company_id'  => $this->company->id,
-            'address_id'  => $this->address->id,
-            'contact_id'  => $this->contact->id,
-            'is_official' => true,
-            'items' => [
-                ['product_id' => $this->product->id, 'quantity' => 1, 'price' => 500000],
-            ],
-        ];
-
-        $created = $this->service->createOrder($data);
+        $created = $this->service->createOrder($this->makeOrderData());
         $fetched = $this->service->getOrder($created->id);
 
         $this->assertNotNull($fetched->customer);
         $this->assertNotNull($fetched->company);
         $this->assertCount(1, $fetched->items);
+    }
+
+    #[Test]
+    public function it_creates_workflow_approvals_automatically()
+    {
+        // ساخت workflow steps
+        WorkflowStep::create(['name' => 'تایید مدیر فروش',  'step_order' => 1, 'role_id' => $this->role->id]);
+        WorkflowStep::create(['name' => 'تایید مدیر مالی',  'step_order' => 2, 'role_id' => $this->role->id]);
+
+        $order = $this->service->createOrder($this->makeOrderData());
+
+        $this->assertDatabaseHas('order_approvals', [
+            'order_id' => $order->id,
+            'status'   => 'pending',
+        ]);
+
+        $this->assertEquals(2, \App\Models\OrderApproval::where('order_id', $order->id)->count());
+    }
+
+    #[Test]
+    public function it_creates_order_without_workflow_steps()
+    {
+        // اگر workflow step نباشه، سفارش باید ثبت بشه بدون خطا
+        $order = $this->service->createOrder($this->makeOrderData());
+
+        $this->assertInstanceOf(Order::class, $order);
+        $this->assertEquals(0, \App\Models\OrderApproval::where('order_id', $order->id)->count());
     }
 }

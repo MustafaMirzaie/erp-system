@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
             WorkflowSeeder::class,
             CompanySeeder::class,
             AdminSeeder::class,
+            PackagingTypeSeeder::class,
+            UnitSeeder::class,
+            FreightTypeSeeder::class,
         ]);
     }
 }

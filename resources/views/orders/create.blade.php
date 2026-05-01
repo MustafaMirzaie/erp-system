@@ -50,6 +50,24 @@
 
                     <hr>
 
+                    <!-- کارشناسان فروش -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">کارشناسان فروش</h5>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="add-sale-btn">
+                            <i class="bx bx-plus me-1"></i> افزودن کارشناس
+                        </button>
+                    </div>
+
+                    <div id="sales-container">
+                        <!-- کارشناسان اینجا اضافه میشن -->
+                    </div>
+
+                    <div id="sales-total" class="text-end text-muted small mb-3" style="display:none;">
+                        جمع درصد مشارکت: <span id="sales-percent-total">0</span>%
+                    </div>
+
+                    <hr>
+
                     <h5 class="mb-3">آیتم‌های سفارش</h5>
                     <div id="items-container">
                         <div class="item-row row g-2 mb-2" data-index="0">
@@ -98,6 +116,8 @@
     <script>
         let products = [];
         let addresses = [];
+        let users = [];
+        let saleIndex = 0;
 
         // بارگذاری مشتریان
         apiCall('/api/v1/customers').then(customers => {
@@ -107,7 +127,7 @@
             });
         });
 
-        // بارگذاری شرکت‌ها از API
+        // بارگذاری شرکت‌ها
         apiCall('/api/v1/companies').then(companies => {
             const sel = document.getElementById('company-select');
             companies.forEach(c => {
@@ -119,6 +139,11 @@
         apiCall('/api/v1/products').then(prods => {
             products = prods;
             updateProductSelects();
+        });
+
+        // بارگذاری کارشناسان فروش
+        apiCall('/api/v1/users').then(u => {
+            users = u;
         });
 
         function updateProductSelects() {
@@ -178,6 +203,83 @@
                 contactSel.innerHTML = '<option value="">گیرنده‌ای یافت نشد</option>';
             }
         });
+
+        // افزودن کارشناس فروش
+        document.getElementById('add-sale-btn').addEventListener('click', function() {
+            const container = document.getElementById('sales-container');
+            const currentSales = container.querySelectorAll('.sale-row').length;
+
+            // چک جمع درصدها قبل از افزودن
+            let currentTotal = 0;
+            document.querySelectorAll('.share-input').forEach(i => currentTotal += parseFloat(i.value) || 0);
+            if (currentTotal >= 100) {
+                showToast('جمع درصد مشارکت به 100% رسیده', 'warning');
+                return;
+            }
+
+            if (currentSales >= 3) {
+                showToast('حداکثر 3 کارشناس فروش می‌توانید انتخاب کنید', 'warning');
+                return;
+            }
+
+            const div = document.createElement('div');
+            div.className = 'sale-row row g-2 mb-2';
+            div.dataset.index = saleIndex++;
+            div.innerHTML = `
+            <div class="col-md-7">
+                <select class="form-select user-select">
+                    <option value="">-- انتخاب کارشناس --</option>
+                    ${users.map(u => `<option value="${u.id}">${u.full_name}</option>`).join('')}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="input-group">
+                    <input type="number" class="form-control share-input" placeholder="درصد" min="1" max="100">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger btn-sm remove-sale w-100">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        `;
+            container.appendChild(div);
+
+            div.querySelector('.share-input').addEventListener('input', updateSalesTotal);
+            div.querySelector('.remove-sale').addEventListener('click', function() {
+                div.remove();
+                updateSalesTotal();
+            });
+
+            document.getElementById('sales-total').style.display = 'block';
+            updateSalesTotal();
+        });
+
+        function updateSalesTotal() {
+            let total = 0;
+            document.querySelectorAll('.share-input').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+
+            const salesTotal = document.getElementById('sales-total');
+            const rows = document.querySelectorAll('.sale-row').length;
+
+            if (rows === 0) {
+                salesTotal.style.display = 'none';
+                return;
+            }
+
+            salesTotal.style.display = 'block';
+
+            if (total > 100) {
+                salesTotal.innerHTML = `<span class="text-danger fw-bold"><i class="bx bx-error me-1"></i>جمع درصد مشارکت: ${total}% (بیشتر از 100%)</span>`;
+            } else if (total === 100) {
+                salesTotal.innerHTML = `<span class="text-success fw-bold"><i class="bx bx-check me-1"></i>جمع درصد مشارکت: ${total}%</span>`;
+            } else {
+                salesTotal.innerHTML = `<span class="text-muted">جمع درصد مشارکت: <span>${total}</span>%</span>`;
+            }
+        }
 
         // افزودن آیتم
         let itemIndex = 1;
@@ -255,6 +357,15 @@
                 return;
             }
 
+            // بررسی درصد کارشناسان
+            let salesTotal = 0;
+            document.querySelectorAll('.share-input').forEach(i => salesTotal += parseFloat(i.value) || 0);
+            if (salesTotal > 100) {
+                alertBox.style.display = 'block';
+                alertBox.innerHTML = '<div class="alert alert-danger">جمع درصد مشارکت کارشناسان نمی‌تواند بیشتر از 100 باشد.</div>';
+                return;
+            }
+
             const items = [];
             let hasError = false;
             document.querySelectorAll('.item-row').forEach(row => {
@@ -271,6 +382,16 @@
                 return;
             }
 
+            // کارشناسان فروش
+            const sales = [];
+            document.querySelectorAll('.sale-row').forEach(row => {
+                const userId = row.querySelector('.user-select').value;
+                const share  = parseFloat(row.querySelector('.share-input').value);
+                if (userId && share) {
+                    sales.push({ user_id: parseInt(userId), share_percent: share });
+                }
+            });
+
             const btn = this;
             btn.disabled = true;
             btn.querySelector('.normal-text').style.display = 'none';
@@ -284,7 +405,8 @@
                     address_id:  parseInt(addressId),
                     contact_id:  parseInt(contactId),
                     is_official: isOfficial,
-                    items
+                    items,
+                    sales: sales.length > 0 ? sales : undefined,
                 })
             }).then(data => {
                 if (data.id) {

@@ -1,10 +1,4 @@
 <?php
-/*
-    * این ریپازیتوری از همین حالا آماده است برای:
-    بارگذاری سفارش با همه روابط
-    دریافت سفارش‌های در وضعیت Pending
-    و هر Query حرفه‌ای که بعداً نیاز داریم
-*/
 
 namespace App\Repositories;
 
@@ -17,20 +11,26 @@ class OrderRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function getOrderWithRelations($id)
+    public function getOrderWithRelations(int $id)
     {
-        return $this->model->with([
-            'customer',
-            'items',
-            'approvals',
-            'company',
-            'address',
-            'contact'
-        ])->findOrFail($id);
+        return $this->model
+            ->with([
+                'customer',
+                'company',
+                'address',
+                'contact',
+                'items.product',
+                'sales.user',
+            ])
+            ->findOrFail($id);
     }
 
     public function getPendingOrders()
     {
-        return $this->model->where('status', 'pending')->get();
+        return $this->model
+            ->with(['customer', 'company'])
+            ->where('status', 'pending')
+            ->latest('created_at')
+            ->get();
     }
 }
