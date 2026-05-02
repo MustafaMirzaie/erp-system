@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use App\Repositories\ProductRepository;
 use Illuminate\Http\Request;
 
@@ -18,17 +19,30 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         if ($request->has('search')) {
-            $products = $this->repo->search($request->search);
-        } else {
-            $products = $this->repo->getActiveProducts();
+            return response()->json($this->repo->search($request->search));
         }
-
-        return response()->json($products);
+        return response()->json($this->repo->getActiveProducts());
     }
 
     public function show($id)
     {
-        $product = $this->repo->findOrFail($id);
-        return response()->json($product);
+        return response()->json($this->repo->findOrFail($id));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name'       => 'required|string',
+            'base_price' => 'nullable|numeric|min:0',
+            'status'     => 'in:active,inactive',
+        ]);
+
+        $product = Product::create([
+            'name'       => $request->name,
+            'base_price' => $request->base_price ?? 0,
+            'status'     => $request->status ?? 'active',
+        ]);
+
+        return response()->json($product, 201);
     }
 }

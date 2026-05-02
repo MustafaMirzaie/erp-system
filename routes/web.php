@@ -2,38 +2,42 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect('/login');
-});
+Route::get('/', fn() => redirect('/login'));
+Route::get('/login', fn() => view('auth.login'));
 
-Route::get('/login', function () {
-    return view('auth.login');
-});
+// Dashboard
+Route::get('/dashboard', fn() => view('dashboard'));
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+// Orders
+Route::get('/orders', fn() => view('orders.index'));
+Route::get('/orders/create', fn() => view('orders.create'));
+Route::get('/orders/{id}', fn($id) => view('orders.show', ['id' => $id]));
 
-Route::get('/orders', function () {
-    return view('orders.index');
-});
+// Customers
+Route::get('/customers', fn() => view('customers.index'));
+Route::get('/customers/create', fn() => view('customers.create'));
+Route::get('/customers/reports', fn() => view('customers.reports'));
+Route::get('/customers/{id}', fn($id) => view('customers.show', ['id' => $id]));
 
-Route::get('/orders/create', function () {
-    return view('orders.create');
-});
+// Products
+Route::get('/products', fn() => view('products.index'));
+Route::get('/products/create', fn() => view('products.create'));
 
-Route::get('/orders/{id}', function ($id) {
-    return view('orders.show', ['id' => $id]);
-});
+// Packaging
+Route::get('/packaging', fn() => view('packaging.index'));
+Route::get('/packaging/create', fn() => view('packaging.create'));
 
-Route::get('/customers', function () {
-    return view('customers.index');
-});
+// Users
+Route::get('/users', fn() => view('users.index'));
+Route::get('/users/create', fn() => view('users.create'));
 
-Route::get('/products', function () {
-    return view('products.index');
-});
+// Roles
+Route::get('/roles', fn() => view('roles.index'));
+Route::get('/roles/create', fn() => view('roles.create'));
 
-Route::get('/workflow', function () {
-    return view('workflow.index');
-});
+// Workflow
+Route::get('/workflow', fn() => view('workflow.index'));
+Route::get('/workflow/create', fn() => view('workflow.create'));
+
+// Profile
+Route::get('/profile', fn() => view('profile'));

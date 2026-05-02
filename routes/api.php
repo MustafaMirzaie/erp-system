@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\RoleController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -31,11 +32,13 @@ Route::prefix('v1')->group(function () {
 
         // Customers
         Route::get('/customers', [CustomerController::class, 'index']);
+        Route::post('/customers', [CustomerController::class, 'store']);
         Route::get('/customers/{id}', [CustomerController::class, 'show']);
         Route::get('/customers/{id}/addresses', [CustomerController::class, 'addresses']);
 
         // Products
         Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
         Route::get('/products/{id}', [ProductController::class, 'show']);
 
         // Companies
@@ -43,17 +46,25 @@ Route::prefix('v1')->group(function () {
 
         // Users
         Route::get('/users', [UserController::class, 'index']);
+        Route::post('/users', [UserController::class, 'store']);
+
+        // Roles
+        Route::get('/roles', [RoleController::class, 'index']);
+        Route::post('/roles', [RoleController::class, 'store']);
 
         // Lookups
-        Route::get('/lookup/packaging-types', [LookupController::class, 'packagingTypes']);
-        Route::get('/lookup/units',           [LookupController::class, 'units']);
-        Route::get('/lookup/freight-types',   [LookupController::class, 'freightTypes']);
+        Route::get('/lookup/packaging-types',       [LookupController::class, 'packagingTypes']);
+        Route::post('/lookup/packaging-types',      [LookupController::class, 'storePackagingType']);
+        Route::delete('/lookup/packaging-types/{id}', [LookupController::class, 'deletePackagingType']);
+        Route::get('/lookup/units',                 [LookupController::class, 'units']);
+        Route::get('/lookup/freight-types',         [LookupController::class, 'freightTypes']);
 
         // Workflow
-        Route::get('/workflow/steps', [WorkflowController::class, 'steps']);
+        Route::get('/workflow/steps',               [WorkflowController::class, 'steps']);
+        Route::post('/workflow/steps',              [WorkflowController::class, 'storeStep']);
         Route::get('/workflow/orders/{orderId}/approvals', [WorkflowController::class, 'orderApprovals']);
         Route::post('/workflow/approvals/{approvalId}/approve', [WorkflowController::class, 'approve']);
-        Route::post('/workflow/approvals/{approvalId}/reject', [WorkflowController::class, 'reject']);
+        Route::post('/workflow/approvals/{approvalId}/reject',  [WorkflowController::class, 'reject']);
 
         // Reports
         Route::prefix('reports')->group(function () {

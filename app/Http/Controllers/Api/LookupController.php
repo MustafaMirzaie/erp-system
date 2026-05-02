@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FreightType;
 use App\Models\PackagingType;
 use App\Models\Unit;
+use Illuminate\Http\Request;
 
 class LookupController extends Controller
 {
@@ -22,5 +23,21 @@ class LookupController extends Controller
     public function freightTypes()
     {
         return response()->json(FreightType::where('is_active', true)->get());
+    }
+
+    public function storePackagingType(Request $request)
+    {
+        $request->validate(['name' => 'required|string']);
+        $item = PackagingType::create([
+            'name'      => $request->name,
+            'is_active' => $request->is_active ?? true,
+        ]);
+        return response()->json($item, 201);
+    }
+
+    public function deletePackagingType($id)
+    {
+        PackagingType::findOrFail($id)->delete();
+        return response()->json(['message' => 'حذف شد']);
     }
 }

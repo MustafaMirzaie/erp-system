@@ -9,10 +9,6 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/app-rtl.min.css') }}" rel="stylesheet" type="text/css" />
     @stack('styles')
-    <style>
-        .toast-container { position: fixed; top: 20px; left: 20px; z-index: 9999; }
-        .sidebar-active { background-color: rgba(255,255,255,0.1); border-radius: 4px; }
-    </style>
 </head>
 
 <body data-sidebar="dark">
@@ -32,10 +28,6 @@
 </div>
 
 <div id="layout-wrapper">
-    <!-- Toast Notifications -->
-    <div class="toast-container">
-        <div id="toast-box"></div>
-    </div>
 
     <!-- Header -->
     <header id="page-topbar">
@@ -44,18 +36,18 @@
                 <div class="navbar-brand-box">
                     <a href="/dashboard" class="logo logo-dark">
                             <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo.svg') }}" alt="لوگو" height="30">
+                                <img src="{{ asset('assets/images/logo.svg') }}" alt="لوگو" height="22">
                             </span>
                         <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="لوگو" height="45">
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="لوگو" height="25">
                             </span>
                     </a>
                     <a href="/dashboard" class="logo logo-light">
                             <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo-light.svg') }}" alt="لوگو" height="30">
+                                <img src="{{ asset('assets/images/logo-light.svg') }}" alt="لوگو" height="22">
                             </span>
                         <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="لوگو" height="45">
+                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="لوگو" height="19">
                             </span>
                     </a>
                 </div>
@@ -90,8 +82,8 @@
         <div data-simplebar class="h-100">
             <div id="sidebar-menu">
                 <ul class="metismenu list-unstyled" id="side-menu">
-                    <li class="menu-title">منو</li>
 
+                    <li class="menu-title">داشبورد</li>
                     <li>
                         <a href="/dashboard" class="waves-effect">
                             <i class="bx bx-home-circle"></i>
@@ -99,40 +91,98 @@
                         </a>
                     </li>
 
+                    <li class="menu-title">فروش</li>
                     <li>
-                        <a href="/orders" class="waves-effect">
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-receipt"></i>
                             <span>سفارش‌ها</span>
                         </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/orders">همه سفارش‌ها</a></li>
+                            <li><a href="/orders/create">سفارش جدید</a></li>
+                        </ul>
                     </li>
 
+                    <li class="menu-title">مشتریان</li>
                     <li>
-                        <a href="/orders/create" class="waves-effect">
-                            <i class="bx bx-plus-circle"></i>
-                            <span>سفارش جدید</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="/customers" class="waves-effect">
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bxs-user-detail"></i>
                             <span>مشتریان</span>
                         </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/customers">لیست مشتریان</a></li>
+                            <li><a href="/customers/create">افزودن مشتری</a></li>
+                            <li><a href="/customers/reports">گزارش خرید</a></li>
+                        </ul>
                     </li>
 
+                    <li class="menu-title">محصولات</li>
                     <li>
-                        <a href="/products" class="waves-effect">
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-package"></i>
                             <span>محصولات</span>
                         </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/products">همه محصولات</a></li>
+                            <li><a href="/products/create">افزودن محصول</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-title">بسته‌بندی</li>
+                    <li>
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                            <i class="bx bx-box"></i>
+                            <span>بسته‌بندی</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/packaging">همه بسته‌بندی‌ها</a></li>
+                            <li><a href="/packaging/create">افزودن بسته‌بندی</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-title">کاربران</li>
+                    <li>
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                            <i class="bx bx-user"></i>
+                            <span>پرسنل</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/users">مدیریت پرسنل</a></li>
+                            <li><a href="/users/create">افزودن پرسنل</a></li>
+                        </ul>
                     </li>
 
                     <li>
-                        <a href="/workflow" class="waves-effect">
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                            <i class="bx bx-shield"></i>
+                            <span>نقش‌ها</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/roles">مدیریت نقش‌ها</a></li>
+                            <li><a href="/roles/create">افزودن نقش</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-title">گردش کار</li>
+                    <li>
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="bx bx-task"></i>
                             <span>گردش کار</span>
                         </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/workflow">مدیریت گردش کار</a></li>
+                            <li><a href="/workflow/create">ایجاد گردش کار</a></li>
+                        </ul>
                     </li>
+
+                    <li class="menu-title">حساب کاربری</li>
+                    <li>
+                        <a href="/profile" class="waves-effect">
+                            <i class="bx bx-user-circle"></i>
+                            <span>پروفایل</span>
+                        </a>
+                    </li>
+
                 </ul>
             </div>
         </div>
@@ -178,6 +228,10 @@
 
 <!-- Right bar overlay -->
 <div class="rightbar-overlay"></div>
+
+<div class="toast-container" style="position:fixed;top:20px;left:20px;z-index:9999;">
+    <div id="toast-box"></div>
+</div>
 
 <script src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -257,7 +311,7 @@
     // Active menu item
     document.querySelectorAll('#side-menu a').forEach(link => {
         if (link.href === window.location.href) {
-            link.classList.add('sidebar-active');
+            link.classList.add('mm-active');
             link.closest('li')?.classList.add('mm-active');
         }
     });
