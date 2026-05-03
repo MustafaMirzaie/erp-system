@@ -83,25 +83,27 @@
 
             empty.style.display = 'none';
             tbody.innerHTML = customers.map(c => `
-            <tr>
-                <td>${c.id}</td>
-                <td><strong>${c.name}</strong></td>
-                <td>${c.economic_code || '-'}</td>
-                <td>${c.national_id || '-'}</td>
-                <td>${c.credit_limit ? Number(c.credit_limit).toLocaleString('fa-IR') + ' ریال' : '-'}</td>
-                <td>
-                    ${c.status === 'active'
-                ? '<span class="badge bg-success">فعال</span>'
-                : '<span class="badge bg-danger">غیرفعال</span>'}
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-primary waves-effect"
-                        onclick="showCustomer(${c.id})">
-                        <i class="bx bx-show"></i> مشاهده
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+                <tr>
+                    <td>${c.id}</td>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.economic_code || '-'}</td>
+                    <td>${c.national_id || '-'}</td>
+                    <td>${c.credit_limit ? Number(c.credit_limit).toLocaleString('fa-IR') + ' ریال' : '-'}</td>
+                    <td>
+                        ${c.status === 'active'
+                            ? '<span class="badge bg-success">فعال</span>'
+                            : '<span class="badge bg-danger">غیرفعال</span>'}
+                    </td>
+                    <td>
+                        <a href="/customers/${c.id}/manage" class="btn btn-sm btn-primary waves-effect me-1" title="مدیریت آدرس">
+                            <i class="bx bx-map"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-info waves-effect" onclick="showCustomer(${c.id})" title="جزئیات">
+                            <i class="bx bx-show"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         // بارگذاری مشتریان
@@ -167,5 +169,14 @@
             `).join('');
             });
         }
+
+        // دکمه افزودن آدرس جدید
+        document.getElementById('modal-body').innerHTML += `
+            <div class="text-center mt-3">
+                <a href="/customers/${id}/addresses/create" class="btn btn-primary btn-sm">
+                    <i class="bx bx-plus me-1"></i> افزودن آدرس و گیرنده
+                </a>
+            </div>
+        `;
     </script>
 @endpush

@@ -12,12 +12,16 @@ Route::get('/dashboard', fn() => view('dashboard'));
 Route::get('/orders', fn() => view('orders.index'));
 Route::get('/orders/create', fn() => view('orders.create'));
 Route::get('/orders/{id}', fn($id) => view('orders.show', ['id' => $id]));
+Route::get('/orders/{id}/approve', fn($id) => view('orders.approve', ['id' => $id]));
+Route::get('/orders/{id}/print', fn($id) => view('orders.print', ['id' => $id]));
 
 // Customers
 Route::get('/customers', fn() => view('customers.index'));
 Route::get('/customers/create', fn() => view('customers.create'));
 Route::get('/customers/reports', fn() => view('customers.reports'));
-Route::get('/customers/{id}', fn($id) => view('customers.show', ['id' => $id]));
+Route::get('/customers/{id}', fn($id) => view('customers.manage', ['customerId' => $id]));
+Route::get('/customers/{id}/addresses/create', fn($id) => view('customers.addresses.create', ['customerId' => $id]));
+Route::get('/customers/{id}/manage', fn($id) => view('customers.manage', ['customerId' => $id]));
 
 // Products
 Route::get('/products', fn() => view('products.index'));
@@ -41,3 +45,7 @@ Route::get('/workflow/create', fn() => view('workflow.create'));
 
 // Profile
 Route::get('/profile', fn() => view('profile'));
+
+// Inbox
+Route::get('/inbox', fn() => view('inbox.index'));
+Route::get('/inbox/order/{id}', fn($id) => view('inbox.show', ['id' => $id]));

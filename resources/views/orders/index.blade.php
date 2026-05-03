@@ -27,7 +27,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table align-middle table-nowrap table-hover mb-0">
+                        <table id="orders-datatable" class="table table-bordered dt-responsive nowrap w-100">
                             <thead class="table-light">
                             <tr>
                                 <th>شناسه</th>
@@ -39,13 +39,7 @@
                                 <th>عملیات</th>
                             </tr>
                             </thead>
-                            <tbody id="orders-table">
-                            <tr>
-                                <td colspan="7" class="text-center py-4">
-                                    <div class="spinner-border text-primary" role="status"></div>
-                                </td>
-                            </tr>
-                            </tbody>
+                            <tbody id="orders-table"></tbody>
                         </table>
                     </div>
 
@@ -85,21 +79,54 @@
 
             empty.style.display = 'none';
             tbody.innerHTML = orders.map(o => `
-            <tr>
-                <td><a href="/orders/${o.id}" class="text-body fw-bold">#${o.id}</a></td>
-                <td>${o.customer?.name || '-'}</td>
-                <td>${o.company?.name || '-'}</td>
-                <td>${o.total_price ? Number(o.total_price).toLocaleString('fa-IR') + ' ریال' : '-'}</td>
-                <td>${statusMap[o.status] || o.status}</td>
-                <td>${o.created_at ? new Date(o.created_at).toLocaleDateString('fa-IR') : '-'}</td>
-                <td>
-                    <a href="/orders/${o.id}" class="btn btn-sm btn-primary waves-effect">
-                        <i class="bx bx-show"></i> مشاهده
-                    </a>
-                </td>
-            </tr>
-        `).join('');
+                <tr>
+                    <td><a href="/orders/${o.id}" class="text-body fw-bold">#${o.id}</a></td>
+                    <td>${o.customer?.name || '-'}</td>
+                    <td>${o.company?.name || '-'}</td>
+                    <td>${o.total_price ? Number(o.total_price).toLocaleString('fa-IR') + ' ریال' : '-'}</td>
+                    <td>${statusMap[o.status] || o.status}</td>
+                    <td>${o.created_at ? new Date(o.created_at).toLocaleDateString('fa-IR') : '-'}</td>
+                    <td>
+                        <a href="/orders/${o.id}" class="btn btn-sm btn-primary waves-effect me-1">
+                            <i class="bx bx-show"></i>
+                        </a>
+                        <a href="/orders/${o.id}/approve" class="btn btn-sm btn-warning waves-effect me-1" title="بررسی">
+                            <i class="bx bx-check-shield"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-secondary waves-effect" title="تکرار سفارش"
+                            onclick="repeatOrder(${o.id})">
+                            <i class="bx bx-copy"></i>
+                        </button>
+                        <a href="/orders/${o.id}/print" class="btn btn-sm btn-outline-dark waves-effect" title="پرینت" target="_blank">
+                            <i class="bx bx-printer"></i>
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
         }
+
+        apiCall('/api/v1/orders').then(orders => {
+            const tbody = document.getElementById('orders-table');
+            tbody.innerHTML = orders.map(o => `...`).join('');
+
+            // DataTable init
+            if ($.fn.DataTable.isDataTable('#orders-datatable')) {
+                $('#orders-datatable').DataTable().destroy();
+            }
+            $('#orders-datatable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fa.json'
+                },
+                dom: 'Bfrtip',
+                buttons: [
+                    { extend: 'print',  text: '<i class="bx bx-printer me-1"></i> پرینت',  className: 'btn btn-sm btn-secondary' },
+                    { extend: 'excel',  text: '<i class="bx bx-export me-1"></i> Excel',   className: 'btn btn-sm btn-success' },
+                ],
+                order: [[0, 'desc']],
+                pageLength: 25,
+                responsive: true,
+            });
+        });
 
         // بارگذاری سفارش‌ها
         apiCall('/api/v1/orders').then(orders => {
@@ -121,5 +148,10 @@
                 }
             });
         });
+
+        // تکرار سفارش
+        function repeatOrder(id) {
+            window.location.href = '/orders/create?repeat=' + id;
+        }
     </script>
 @endpush

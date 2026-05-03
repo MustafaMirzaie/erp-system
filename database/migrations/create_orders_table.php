@@ -20,11 +20,13 @@ return new class extends Migration
             $table->date('send_date')->nullable();
             $table->unsignedBigInteger('freight_type_id')->nullable();
             $table->decimal('freight_amount', 15, 2)->default(0);
+            $table->decimal('insurance_amount', 15, 2)->default(0);
             $table->text('payment_terms')->nullable();
             $table->text('notes')->nullable();
             $table->decimal('total_price', 15, 2)->nullable();
             $table->enum('status', ['draft', 'pending', 'approved', 'rejected', 'revision'])->default('draft');
             $table->unsignedBigInteger('created_by')->index();
+            $table->enum('payment_type', ['cash', 'check', 'credit'])->default('cash');
             $table->timestamp('created_at')->useCurrent();
         });
     }

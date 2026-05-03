@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\WorkflowController;
 use App\Http\Controllers\Api\CompanyController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\LookupController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\InboxController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -28,6 +30,7 @@ Route::prefix('v1')->group(function () {
         // Orders
         Route::get('/orders', [OrderController::class, 'index']);
         Route::post('/orders', [OrderController::class, 'store']);
+        Route::get('/orders/next-number', [OrderController::class, 'nextNumber']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
 
         // Customers
@@ -35,6 +38,21 @@ Route::prefix('v1')->group(function () {
         Route::post('/customers', [CustomerController::class, 'store']);
         Route::get('/customers/{id}', [CustomerController::class, 'show']);
         Route::get('/customers/{id}/addresses', [CustomerController::class, 'addresses']);
+        Route::post('/customers/{id}/addresses', [CustomerController::class, 'storeAddress']);
+        Route::post('/customers/addresses/{id}/contacts', [CustomerController::class, 'storeContact']);
+        Route::get('/customers/addresses/{id}/contacts', [CustomerController::class, 'addressContacts']);
+
+        // Provinces & Cities
+        Route::get('/provinces', [LocationController::class, 'provinces']);
+        Route::get('/provinces/{id}/cities', [LocationController::class, 'cities']);
+
+        // Customer Addresses
+        Route::post('/customers/{id}/addresses', [CustomerController::class, 'storeAddress']);
+        Route::put('/customers/addresses/{id}', [CustomerController::class, 'updateAddress']);
+        Route::patch('/customers/addresses/{id}/toggle', [CustomerController::class, 'toggleAddress']);
+        Route::post('/customers/addresses/{id}/contacts', [CustomerController::class, 'storeContact']);
+        Route::put('/customers/contacts/{id}', [CustomerController::class, 'updateContact']);
+        Route::patch('/customers/contacts/{id}/toggle', [CustomerController::class, 'toggleContact']);
 
         // Products
         Route::get('/products', [ProductController::class, 'index']);
@@ -65,6 +83,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/workflow/orders/{orderId}/approvals', [WorkflowController::class, 'orderApprovals']);
         Route::post('/workflow/approvals/{approvalId}/approve', [WorkflowController::class, 'approve']);
         Route::post('/workflow/approvals/{approvalId}/reject',  [WorkflowController::class, 'reject']);
+
+        // Inbox
+        Route::get('/inbox/my-tasks',    [InboxController::class, 'myTasks']);
+        Route::get('/inbox/in-progress', [InboxController::class, 'inProgress']);
+        Route::get('/inbox/completed',   [InboxController::class, 'completed']);
+        Route::get('/inbox/roles',       [InboxController::class, 'myInboxRoles']);
 
         // Reports
         Route::prefix('reports')->group(function () {

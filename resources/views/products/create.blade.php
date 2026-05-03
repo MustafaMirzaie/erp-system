@@ -46,14 +46,12 @@
         document.getElementById('submit-btn').addEventListener('click', async function() {
             const alertBox = document.getElementById('alert-box');
             alertBox.style.display = 'none';
-
             const name = document.getElementById('name').value.trim();
             if (!name) {
                 alertBox.style.display = 'block';
                 alertBox.innerHTML = '<div class="alert alert-danger">نام محصول الزامی است.</div>';
                 return;
             }
-
             const btn = this;
             btn.disabled = true;
             btn.querySelector('.normal-text').style.display = 'none';
@@ -64,7 +62,7 @@
                 body: JSON.stringify({
                     name,
                     base_price: parseFloat(document.getElementById('base_price').value) || 0,
-                    status:     document.getElementById('status').value,
+                    status: document.getElementById('status').value,
                 })
             });
 

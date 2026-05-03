@@ -40,6 +40,8 @@ class OrderController extends Controller
             'sales'                => 'nullable|array|max:3',
             'sales.*.user_id'      => 'required|exists:users,id',
             'sales.*.share_percent'=> 'required|numeric|min:1|max:100',
+            'insurance_amount'     => 'nullable|numeric|min:0',
+            'payment_type'         => 'required|in:cash,check,credit',
         ]);
 
         // بررسی جمع درصدها
@@ -61,5 +63,11 @@ class OrderController extends Controller
     {
         $order = $this->service->getOrder($id);
         return response()->json($order);
+    }
+
+    public function nextNumber()
+    {
+        $last = \App\Models\Order::max('order_number') ?? 0;
+        return response()->json(['number' => $last + 1]);
     }
 }

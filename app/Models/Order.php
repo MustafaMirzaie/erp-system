@@ -25,6 +25,8 @@ class Order extends Model
         'status',
         'created_by',
         'created_at',
+        'insurance_amount',
+        'payment_type',
     ];
 
     protected $casts = [

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->text('full_address')->nullable();
             $table->boolean('is_default')->default(0);
-
+            $table->boolean('is_active')->default(true);
             $table->index('customer_id');
         });
     }

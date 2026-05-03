@@ -55,18 +55,14 @@
 
 @push('scripts')
     <script>
-        // بارگذاری نقش‌ها
         apiCall('/api/v1/roles').then(roles => {
             const sel = document.getElementById('role_id');
-            roles.forEach(r => {
-                sel.innerHTML += `<option value="${r.id}">${r.name}</option>`;
-            });
+            roles.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.name}</option>`);
         });
 
         document.getElementById('submit-btn').addEventListener('click', async function() {
             const alertBox = document.getElementById('alert-box');
             alertBox.style.display = 'none';
-
             const full_name = document.getElementById('full_name').value.trim();
             const username  = document.getElementById('username').value.trim();
             const password  = document.getElementById('password').value;
@@ -77,7 +73,6 @@
                 alertBox.innerHTML = '<div class="alert alert-danger">لطفاً همه فیلدهای الزامی را پر کنید.</div>';
                 return;
             }
-
             const btn = this;
             btn.disabled = true;
             btn.querySelector('.normal-text').style.display = 'none';

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('phone')->nullable();
             $table->string('mobile')->nullable();
-
+            $table->boolean('is_active')->default(true);
             $table->index('address_id');
         });
     }

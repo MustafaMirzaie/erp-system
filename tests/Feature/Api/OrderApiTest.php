@@ -66,6 +66,7 @@ class OrderApiTest extends TestCase
             'address_id'  => $this->address->id,
             'contact_id'  => $this->contact->id,
             'is_official' => true,
+            'payment_type'=> 'cash',
             'items' => [
                 [
                     'product_id' => $this->product->id,

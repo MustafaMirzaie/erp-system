@@ -8,6 +8,10 @@
     <link href="{{ asset('assets/css/bootstrap-rtl.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/app-rtl.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/persian-datepicker.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/libs/select2/css/select2.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css') }}" rel="stylesheet">
     @stack('styles')
 </head>
 
@@ -35,20 +39,20 @@
             <div class="d-flex">
                 <div class="navbar-brand-box">
                     <a href="/dashboard" class="logo logo-dark">
-                            <span class="logo-sm">
+                        <span class="logo-sm">
                                 <img src="{{ asset('assets/images/logo.svg') }}" alt="لوگو" height="22">
-                            </span>
+                        </span>
                         <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="لوگو" height="25">
-                            </span>
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="لوگو" height="35">
+                        </span>
                     </a>
                     <a href="/dashboard" class="logo logo-light">
-                            <span class="logo-sm">
-                                <img src="{{ asset('assets/images/logo-light.svg') }}" alt="لوگو" height="22">
-                            </span>
+                        <span class="logo-sm">
+                            <img src="{{ asset('assets/images/logo-light.svg') }}" alt="لوگو" height="22">
+                        </span>
                         <span class="logo-lg">
-                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="لوگو" height="19">
-                            </span>
+                                <img src="{{ asset('assets/images/logo-light.png') }}" alt="لوگو" height="35">
+                        </span>
                     </a>
                 </div>
 
@@ -89,6 +93,27 @@
                             <i class="bx bx-home-circle"></i>
                             <span>داشبورد</span>
                         </a>
+                    </li>
+
+                    <li class="menu-title">صندوق دریافتی</li>
+                    <li>
+                        <a href="/inbox" class="waves-effect">
+                            <i class="bx bx-inbox"></i>
+                            <span>صندوق دریافتی</span>
+                            <span class="badge rounded-pill bg-danger float-end" id="inbox-badge" style="display:none;"></span>
+                        </a>
+                    </li>
+
+                    <li class="menu-title">گردش کار</li>
+                    <li>
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                            <i class="bx bx-task"></i>
+                            <span>گردش کار</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="/workflow">مدیریت گردش کار</a></li>
+                            <li><a href="/workflow/create">ایجاد گردش کار</a></li>
+                        </ul>
                     </li>
 
                     <li class="menu-title">فروش</li>
@@ -163,18 +188,6 @@
                         </ul>
                     </li>
 
-                    <li class="menu-title">گردش کار</li>
-                    <li>
-                        <a href="javascript: void(0);" class="has-arrow waves-effect">
-                            <i class="bx bx-task"></i>
-                            <span>گردش کار</span>
-                        </a>
-                        <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="/workflow">مدیریت گردش کار</a></li>
-                            <li><a href="/workflow/create">ایجاد گردش کار</a></li>
-                        </ul>
-                    </li>
-
                     <li class="menu-title">حساب کاربری</li>
                     <li>
                         <a href="/profile" class="waves-effect">
@@ -201,7 +214,11 @@
                             <div class="page-title-right">
                                 <ol class="breadcrumb m-0">
                                     <li class="breadcrumb-item"><a href="/dashboard">خانه</a></li>
-                                    <li class="breadcrumb-item active">@yield('page-title', 'داشبورد')</li>
+                                    @hasSection('breadcrumb')
+                                        @yield('breadcrumb')
+                                    @else
+                                        <li class="breadcrumb-item active">@yield('page-title', 'داشبورد')</li>
+                                    @endif
                                 </ol>
                             </div>
                         </div>
@@ -240,37 +257,26 @@
 <script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script>
 <script src="{{ asset('assets/js/app.js') }}"></script>
 
+<script src="{{ asset('assets/libs/select2/js/select2.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-buttons-bs4/js/buttons.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-buttons/js/buttons.html5.min.js') }}"></script>
+<script src="{{ asset('assets/libs/datatables.net-buttons/js/buttons.print.min.js') }}"></script>
+<script src="{{ asset('assets/js/persian-date.min.js') }}"></script>
+<script src="{{ asset('assets/js/persian-datepicker.min.js') }}"></script>
+
 <script>
-    // چک token
     const token = localStorage.getItem('erp_token');
     const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
 
-    if (!token) {
-        window.location.href = '/login';
-    }
+    if (!token) { window.location.href = '/login'; }
 
-    // نمایش نام کاربر
     if (user.full_name) {
         document.getElementById('header-username').textContent = user.full_name;
     }
 
-    // logout
-    document.getElementById('logout-btn').addEventListener('click', function(e) {
-        e.preventDefault();
-        fetch('/api/v1/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-                'Accept': 'application/json',
-            }
-        }).finally(() => {
-            localStorage.removeItem('erp_token');
-            localStorage.removeItem('erp_user');
-            window.location.href = '/login';
-        });
-    });
-
-    // Helper برای API calls
     window.apiCall = function(url, options = {}) {
         return fetch(url, {
             ...options,
@@ -283,38 +289,64 @@
         }).then(res => res.json());
     };
 
-    // Toast notification
     window.showToast = function(message, type = 'success') {
-        const colors = {
-            'success': 'bg-success',
-            'error':   'bg-danger',
-            'warning': 'bg-warning',
-            'info':    'bg-info',
-        };
+        const colors = { 'success': 'bg-success', 'error': 'bg-danger', 'warning': 'bg-warning', 'info': 'bg-info' };
         const id = 'toast-' + Date.now();
-        const html = `
-        <div id="${id}" class="toast align-items-center text-white ${colors[type]} border-0 mb-2 show"
-            role="alert" style="min-width:280px;">
-            <div class="d-flex">
-                <div class="toast-body">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                    onclick="document.getElementById('${id}').remove()"></button>
-            </div>
-        </div>`;
-        document.getElementById('toast-box').insertAdjacentHTML('beforeend', html);
-        setTimeout(() => {
-            const el = document.getElementById(id);
-            if (el) el.remove();
-        }, 4000);
+        document.getElementById('toast-box').insertAdjacentHTML('beforeend', `
+            <div id="${id}" class="toast align-items-center text-white ${colors[type]} border-0 mb-2 show"
+                role="alert" style="min-width:280px;">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                        onclick="document.getElementById('${id}').remove()"></button>
+                </div>
+            </div>`);
+        setTimeout(() => { const el = document.getElementById(id); if (el) el.remove(); }, 4000);
     };
 
-    // Active menu item
+    document.getElementById('logout-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch('/api/v1/logout', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+        }).finally(() => {
+            localStorage.removeItem('erp_token');
+            localStorage.removeItem('erp_user');
+            window.location.href = '/login';
+        });
+    });
+
     document.querySelectorAll('#side-menu a').forEach(link => {
         if (link.href === window.location.href) {
             link.classList.add('mm-active');
             link.closest('li')?.classList.add('mm-active');
         }
     });
+
+    // بارگذاری آواتار از دیتابیس
+    apiCall('/api/v1/profile').then(profile => {
+        if (profile.avatar) {
+            document.querySelector('.header-profile-user').src = profile.avatar;
+        }
+    }).catch(() => {});
+
+    // badge صندوق دریافتی
+    apiCall('/api/v1/inbox/my-tasks').then(tasks => {
+        if (tasks.length > 0) {
+            const badge = document.getElementById('inbox-badge');
+            if (badge) { badge.textContent = tasks.length; badge.style.display = 'inline'; }
+        }
+    }).catch(() => {});
+
+    // تبدیل به شمسی
+    window.toJalali = function(dateStr) {
+        if (!dateStr) return '-';
+        try {
+            return new Date(dateStr).toLocaleDateString('fa-IR', {
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            });
+        } catch(e) { return dateStr; }
+    };
 </script>
 
 @stack('scripts')

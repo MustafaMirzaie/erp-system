@@ -636,3 +636,41 @@ production-ready رسیده است.
 نتیجه:
 دیتابیس کامل شد. API های lookup آماده‌اند.
 مرحله بعد: sidebar کامل و صفحات CRUD.
+
+
+
+----
+
+
+## 📍 Update – Inbox & Workflow UI Completed
+
+✔ InboxController با my-tasks، in-progress، completed پیاده‌سازی شد
+✔ Admin فول دسترسی به inbox دارد
+✔ صفحه inbox با 3 تب کامل شد
+✔ صفحه جزئیات inbox با stepper و دکمه‌های اقدام
+✔ مشکل کامبوباکس وضعیت در products/create و users/create برطرف شد
+✔ صفحه customers/reports ساخته شد
+✔ صفحه approve سفارش ساخته شد
+✔ badge badge صندوق دریافتی در sidebar
+
+نتیجه:
+سیستم گردش کار کاملاً functional است.
+
+
+
+----
+
+
+
+## 📍 Update – Address Management & Province/City System
+
+✔ جداول provinces و cities با 31 استان و شهرستان‌ها ساخته شدند
+✔ is_active به customer_addresses و customer_contacts اضافه شد
+✔ صفحه مدیریت آدرس‌ها با ویرایش و غیرفعال‌سازی
+✔ صفحه ثبت آدرس جدید با combo استان/شهرستان از دیتابیس
+✔ API endpoints: storeAddress, updateAddress, toggleAddress
+✔ API endpoints: storeContact, updateContact, toggleContact
+✔ LocationController با provinces و cities endpoints
+✔ صفحه جزئیات سفارش کامل شد
+✔ برگ خروج پرینت اصلاح شد
+✔ مجموع: 61 passed / 157 assertions

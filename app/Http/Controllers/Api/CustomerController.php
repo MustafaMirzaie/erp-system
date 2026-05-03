@@ -41,11 +41,11 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'         => 'required|string',
-            'economic_code'=> 'nullable|string',
-            'national_id'  => 'nullable|string',
-            'credit_limit' => 'nullable|numeric|min:0',
-            'status'       => 'in:active,inactive',
+            'name'          => 'required|string',
+            'economic_code' => 'nullable|string',
+            'national_id'   => 'nullable|string',
+            'credit_limit'  => 'nullable|numeric|min:0',
+            'status'        => 'in:active,inactive',
         ]);
 
         DB::beginTransaction();
@@ -85,5 +85,81 @@ class CustomerController extends Controller
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function storeAddress(Request $request, $id)
+    {
+        $request->validate([
+            'title'        => 'required|string',
+            'province'     => 'required|string',
+            'city'         => 'required|string',
+            'full_address' => 'required|string',
+            'is_default'   => 'boolean',
+        ]);
+
+        if ($request->is_default) {
+            CustomerAddress::where('customer_id', $id)->update(['is_default' => false]);
+        }
+
+        $address = CustomerAddress::create([
+            'customer_id'  => $id,
+            'title'        => $request->title,
+            'province'     => $request->province,
+            'city'         => $request->city,
+            'full_address' => $request->full_address,
+            'is_default'   => $request->is_default ?? false,
+            'is_active'    => true,
+        ]);
+
+        return response()->json($address, 201);
+    }
+
+    public function addressContacts($addressId)
+    {
+        $address = CustomerAddress::with('contacts')->findOrFail($addressId);
+        return response()->json($address->contacts);
+    }
+
+    public function updateAddress(Request $request, $id)
+    {
+        $address = CustomerAddress::findOrFail($id);
+        $address->update($request->only(['title', 'province', 'city', 'full_address', 'is_default']));
+        return response()->json($address);
+    }
+
+    public function toggleAddress($id)
+    {
+        $address = CustomerAddress::findOrFail($id);
+        $address->is_active = !($address->is_active ?? true);
+        $address->save();
+        return response()->json($address);
+    }
+
+    public function storeContact(Request $request, $addressId)
+    {
+        $request->validate(['full_name' => 'required|string']);
+        $contact = CustomerContact::create([
+            'address_id' => $addressId,
+            'full_name'  => $request->full_name,
+            'mobile'     => $request->mobile ?? null,
+            'phone'      => $request->phone ?? null,
+            'is_active'  => true,
+        ]);
+        return response()->json($contact, 201);
+    }
+
+    public function updateContact(Request $request, $id)
+    {
+        $contact = CustomerContact::findOrFail($id);
+        $contact->update($request->only(['full_name', 'mobile', 'phone']));
+        return response()->json($contact);
+    }
+
+    public function toggleContact($id)
+    {
+        $contact = CustomerContact::findOrFail($id);
+        $contact->is_active = !($contact->is_active ?? true);
+        $contact->save();
+        return response()->json($contact);
     }
 }

@@ -47,14 +47,18 @@
                         <input type="text" class="form-control" id="address_title" placeholder="مثال: دفتر مرکزی">
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
                             <label class="form-label">استان</label>
-                            <input type="text" class="form-control" id="province">
+                            <select class="form-select" id="province">
+                                <option value="">-- انتخاب استان --</option>
+                            </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">شهر</label>
-                            <input type="text" class="form-control" id="city">
+                        <div class="col-md-6">
+                            <label class="form-label">شهرستان</label>
+                            <select class="form-select" id="city" disabled>
+                                <option value="">-- ابتدا استان انتخاب کنید --</option>
+                            </select>
                         </div>
                     </div>
 
@@ -66,18 +70,18 @@
                     <hr>
                     <h5 class="mb-3">گیرنده پیش‌فرض</h5>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-5">
                             <label class="form-label">نام و نام خانوادگی</label>
                             <input type="text" class="form-control" id="contact_name">
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">تلفن</label>
-                            <input type="text" class="form-control" id="contact_phone">
-                        </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-3">
                             <label class="form-label">موبایل</label>
                             <input type="text" class="form-control" id="contact_mobile">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">تلفن</label>
+                            <input type="text" class="form-control" id="contact_phone">
                         </div>
                     </div>
 
@@ -145,6 +149,31 @@
                 btn.querySelector('.normal-text').style.display = 'inline';
                 btn.querySelector('.loading-text').style.display = 'none';
             }
+        });
+
+        // بارگذاری استان‌ها
+        let provinceData = [];
+        apiCall('/api/v1/provinces').then(provinces => {
+            provinceData = provinces;
+            const sel = document.getElementById('province');
+            if (sel) {
+                provinces.forEach(p => sel.innerHTML += `<option value="${p.name}" data-id="${p.id}">${p.name}</option>`);
+            }
+        });
+
+        // انتخاب استان → شهرستان
+        document.getElementById('province')?.addEventListener('change', function() {
+            const citySel = document.getElementById('city');
+            citySel.innerHTML = '<option value="">-- انتخاب شهرستان --</option>';
+            citySel.disabled = true;
+            const province = provinceData.find(p => p.name === this.value);
+            if (!province) return;
+            apiCall(`/api/v1/provinces/${province.id}/cities`).then(cities => {
+                if (Array.isArray(cities)) {
+                    cities.forEach(c => citySel.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+                    citySel.disabled = false;
+                }
+            });
         });
     </script>
 @endpush

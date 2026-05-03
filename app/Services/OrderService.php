@@ -30,13 +30,20 @@ class OrderService
 
         try {
             $order = $this->orders->create([
-                'customer_id' => $data['customer_id'],
-                'company_id'  => $data['company_id'],
-                'address_id'  => $data['address_id'],
-                'contact_id'  => $data['contact_id'],
-                'is_official' => $data['is_official'] ?? false,
-                'status'      => 'pending',
-                'created_by'  => auth()->id(),
+                'customer_id'      => $data['customer_id'],
+                'company_id'       => $data['company_id'],
+                'address_id'       => $data['address_id'],
+                'contact_id'       => $data['contact_id'],
+                'is_official'      => $data['is_official'] ?? false,
+                'status'           => 'pending',
+                'created_by'       => auth()->id(),
+                'order_number'     => $data['order_number'] ?? null,
+                'send_date'        => $data['send_date'] ?? null,
+                'freight_type_id'  => $data['freight_type_id'] ?? null,
+                'freight_amount'   => $data['freight_amount'] ?? 0,
+                'insurance_amount' => $data['insurance_amount'] ?? 0,
+                'payment_terms'    => $data['payment_terms'] ?? null,
+                'notes'            => $data['notes'] ?? null,
             ]);
 
             // آیتم‌ها
