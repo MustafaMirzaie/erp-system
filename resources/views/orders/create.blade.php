@@ -835,16 +835,17 @@
                     contact_id:      parseInt(contactId),
                     is_official:     isOfficial,
                     order_number:    document.getElementById('order_number').value || null,
+                    issue_date:      document.getElementById('issue_date').value || null,
                     send_date:       document.getElementById('send_date').value || null,
                     freight_type_id: document.getElementById('freight-type-select').value
                         ? parseInt(document.getElementById('freight-type-select').value) : null,
-                    freight_amount:  parseFloat(document.getElementById('freight_amount').value) || 0,
+                    freight_amount:  window._freightRaw || 0,
+                    payment_type:    document.getElementById('payment_type').value,
                     payment_terms:   document.getElementById('payment_terms').value || null,
                     notes:           document.getElementById('notes').value || null,
                     items,
-                    sales: sales.length ? sales : undefined,
+                    sales:           sales.length ? sales : undefined,
                     insurance_amount: window._insuranceAmount || 0,
-                    payment_type: document.getElementById('payment_type').value,
                 })
             });
 

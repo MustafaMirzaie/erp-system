@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 
@@ -17,8 +18,7 @@ class OrderController extends Controller
 
     public function index()
     {
-        $orders = auth()->user()->createdOrders()
-            ->with(['customer', 'company', 'items'])
+        $orders = Order::with(['customer', 'company', 'items'])
             ->latest('created_at')
             ->get();
 
@@ -28,23 +28,32 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'customer_id'          => 'required|exists:customers,id',
-            'company_id'           => 'required|exists:companies,id',
-            'address_id'           => 'required|exists:customer_addresses,id',
-            'contact_id'           => 'required|exists:customer_contacts,id',
-            'is_official'          => 'boolean',
-            'items'                => 'required|array|min:1',
-            'items.*.product_id'   => 'required|exists:products,id',
-            'items.*.quantity'     => 'required|integer|min:1',
-            'items.*.price'        => 'required|numeric|min:0',
-            'sales'                => 'nullable|array|max:3',
-            'sales.*.user_id'      => 'required|exists:users,id',
-            'sales.*.share_percent'=> 'required|numeric|min:1|max:100',
-            'insurance_amount'     => 'nullable|numeric|min:0',
-            'payment_type'         => 'required|in:cash,check,credit',
+            'customer_id'           => 'required|exists:customers,id',
+            'company_id'            => 'required|exists:companies,id',
+            'address_id'            => 'required|exists:customer_addresses,id',
+            'contact_id'            => 'required|exists:customer_contacts,id',
+            'is_official'           => 'boolean',
+            'order_number'          => 'nullable|string|max:50',
+            'issue_date'            => 'nullable|date',
+            'send_date'             => 'nullable|date',
+            'freight_type_id'       => 'nullable|exists:freight_types,id',
+            'freight_amount'        => 'nullable|numeric|min:0',
+            'insurance_amount'      => 'nullable|numeric|min:0',
+            'payment_type'          => 'required|in:cash,check,credit',
+            'payment_terms'         => 'nullable|string',
+            'notes'                 => 'nullable|string',
+            'items'                 => 'required|array|min:1',
+            'items.*.product_id'    => 'required|exists:products,id',
+            'items.*.quantity'      => 'required|integer|min:1',
+            'items.*.price'         => 'required|numeric|min:0',
+            'items.*.amount'        => 'nullable|numeric|min:0',
+            'items.*.packaging_type_id' => 'nullable|exists:packaging_types,id',
+            'items.*.unit_id'       => 'nullable|exists:units,id',
+            'sales'                 => 'nullable|array|max:3',
+            'sales.*.user_id'       => 'required|exists:users,id',
+            'sales.*.share_percent' => 'required|numeric|min:1|max:100',
         ]);
 
-        // بررسی جمع درصدها
         if (!empty($data['sales'])) {
             $total = array_sum(array_column($data['sales'], 'share_percent'));
             if ($total > 100) {
@@ -54,20 +63,31 @@ class OrderController extends Controller
             }
         }
 
+        \Log::info('Order payload:', $data);
         $order = $this->service->createOrder($data);
-
         return response()->json($order, 201);
     }
 
     public function show($id)
     {
-        $order = $this->service->getOrder($id);
+        $order = Order::with([
+            'customer', 'company',
+            'address', 'contact',
+            'freightType',
+            'items.product',
+            'items.packagingType',
+            'items.unit',
+            'sales.user',
+            'approvals.step',
+            'createdBy',
+        ])->findOrFail($id);
+
         return response()->json($order);
     }
 
     public function nextNumber()
     {
-        $last = \App\Models\Order::max('order_number') ?? 0;
+        $last = Order::max('id') ?? 0;
         return response()->json(['number' => $last + 1]);
     }
 }

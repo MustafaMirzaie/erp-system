@@ -5,14 +5,23 @@
     <title>ورود | ERP System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
-    <link href="{{ asset('assets/css/bootstrap-rtl.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/app-rtl.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/bootstrap-rtl.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/app-rtl.min.css') }}" rel="stylesheet">
     <style>
         body { direction: rtl; text-align: right; }
-        .form-label { float: right; }
-        .error-message { color: #f46a6a; font-size: 13px; margin-top: 5px; }
-        .loading { display: none; }
+        #username, #password { direction: ltr; text-align: left; }
+        .toggle-password {
+            cursor: pointer;
+            border: 1px solid #ced4da;
+            border-left: none;
+            border-right: 1px solid #ced4da;
+            background: #f8f9fa;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            border-radius: 0 4px 4px 0;
+        }
     </style>
 </head>
 <body>
@@ -38,42 +47,60 @@
                         <div class="auth-logo">
                             <a href="#" class="auth-logo-dark">
                                 <div class="avatar-md profile-user-wid mb-4">
-                                        <span class="avatar-title rounded-circle bg-light">
-                                            <img src="{{ asset('assets/images/logo.svg') }}" alt="" class="rounded-circle" height="55">
-                                        </span>
+                                    <span class="avatar-title rounded-circle bg-light">
+                                        <img src="{{ asset('assets/images/logo.svg') }}" alt="" class="rounded-circle" height="55">
+                                    </span>
                                 </div>
                             </a>
                         </div>
                         <div class="p-2">
-                            <!-- Error Message -->
                             <div id="error-alert" class="alert alert-danger" style="display:none;">
                                 <span id="error-text"></span>
                             </div>
 
                             <div class="mb-3">
-                                <label for="username" class="form-label">نام کاربری</label>
-                                <input type="text" class="form-control" id="username" placeholder="نام کاربری را وارد کنید">
+                                <label class="form-label">نام کاربری</label>
+                                <input type="text" class="form-control" id="username"
+                                       placeholder="نام کاربری را وارد کنید">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">رمز عبور</label>
-                                <div class="input-group auth-pass-inputgroup">
-                                    <input type="password" class="form-control" id="password" placeholder="رمز عبور را وارد کنید">
-                                    <button class="btn btn-light" type="button" id="password-addon">
-                                        <i class="mdi mdi-eye-outline"></i>
+                                <div class="d-flex">
+                                    <span class="toggle-password" id="toggle-pwd">
+                                        <i class="mdi mdi-eye-outline" id="eye-icon"></i>
+                                    </span>
+                                    <input type="password" class="form-control" id="password"
+                                           placeholder="رمز عبور را وارد کنید"
+                                           style="border-radius: 4px 0 0 4px; border-right: none;">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">تأیید امنیتی</label>
+                                <div class="d-flex align-items-stretch gap-2" style="direction:ltr;">
+                                    <span class="badge bg-primary d-flex align-items-center px-3"
+                                          id="captcha-question" style="font-size:15px; min-width:80px; justify-content:center; border-radius:4px;">
+                                    </span>
+                                    <span class="d-flex align-items-center fw-bold fs-5">=</span>
+                                    <input type="text" class="form-control" id="captcha-answer"
+                                           placeholder="جواب" style="max-width:90px; text-align:center;">
+                                    <button type="button" class="btn btn-outline-secondary d-flex align-items-center"
+                                            id="refresh-captcha" title="تغییر سوال" style="min-width:42px;">
+                                        <i class="mdi mdi-refresh"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="form-check">
+                            <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="remember-check">
                                 <label class="form-check-label" for="remember-check">مرا به خاطر بسپار</label>
                             </div>
 
-                            <div class="mt-3 d-grid">
+                            <div class="d-grid">
                                 <button class="btn btn-primary waves-effect waves-light" id="login-btn" type="button">
-                                    <span class="normal-text">ورود</span>
-                                    <span class="loading">در حال ورود...</span>
+                                    <span id="btn-normal">ورود</span>
+                                    <span id="btn-loading" style="display:none;">در حال ورود...</span>
                                 </button>
                             </div>
                         </div>
@@ -89,90 +116,151 @@
 
 <script src="{{ asset('assets/libs/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ asset('assets/libs/metismenu/metisMenu.min.js') }}"></script>
-<script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script>
 <script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script>
-<script src="{{ asset('assets/js/app.js') }}"></script>
 
 <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // نمایش/مخفی رمز عبور
-    document.getElementById('password-addon').addEventListener('click', function () {
-        const pwd = document.getElementById('password');
-        const icon = this.querySelector('i');
+    // ========== CAPTCHA ==========
+    let captchaAnswer = 0;
+    let failedAttempts = parseInt(localStorage.getItem('login_fails') || '0');
+    let lockUntil = parseInt(localStorage.getItem('login_lock') || '0');
 
-        if (pwd.getAttribute('type') === 'password') {
-            pwd.setAttribute('type', 'text');
-            icon.classList.remove('mdi-eye-outline');
-            icon.classList.add('mdi-eye-off-outline');
-        } else {
-            pwd.setAttribute('type', 'password');
-            icon.classList.remove('mdi-eye-off-outline');
-            icon.classList.add('mdi-eye-outline');
+    function generateCaptcha() {
+        const a = Math.floor(Math.random() * 10) + 1;
+        const b = Math.floor(Math.random() * 10) + 1;
+        const ops = ['+', '-', '×'];
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        let answer;
+        if (op === '+') answer = a + b;
+        else if (op === '-') answer = Math.abs(a - b);
+        else answer = a * b;
+        const q = op === '-' ? `${Math.max(a,b)} - ${Math.min(a,b)}` : `${a} ${op} ${b}`;
+        document.getElementById('captcha-question').textContent = q;
+        document.getElementById('captcha-answer').value = '';
+        captchaAnswer = answer;
+    }
+
+    document.getElementById('refresh-captcha').addEventListener('click', generateCaptcha);
+    generateCaptcha();
+
+    // ========== LOCK CHECK ==========
+    function checkLock() {
+        const now = Date.now();
+        if (lockUntil > now) {
+            const remaining = Math.ceil((lockUntil - now) / 1000);
+            showError(`حساب موقتاً قفل شده. ${remaining} ثانیه دیگر تلاش کنید.`);
+            document.getElementById('login-btn').disabled = true;
+            setTimeout(checkLock, 1000);
+            return true;
+        } else if (lockUntil && lockUntil <= now) {
+            localStorage.removeItem('login_lock');
+            localStorage.removeItem('login_fails');
+            failedAttempts = 0;
+            document.getElementById('login-btn').disabled = false;
+            document.getElementById('error-alert').style.display = 'none';
         }
-    });
+        return false;
+    }
+    checkLock();
 
-    // ورود
-    document.getElementById('login-btn').addEventListener('click', function() {
+    // ========== HELPERS ==========
+    function showError(msg) {
+        const el = document.getElementById('error-alert');
+        document.getElementById('error-text').textContent = msg;
+        el.style.display = 'block';
+    }
+
+    // ========== TOGGLE PASSWORD ==========
+    document.getElementById('toggle-pwd').onclick = function() {
+        const pwd = document.getElementById('password');
+        const icon = document.getElementById('eye-icon');
+        if (pwd.type === 'password') {
+            pwd.type = 'text';
+            icon.className = 'mdi mdi-eye-off-outline';
+        } else {
+            pwd.type = 'password';
+            icon.className = 'mdi mdi-eye-outline';
+        }
+    };
+
+    // ========== LOGIN ==========
+    function doLogin() {
+        if (checkLock()) return;
+
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
+        const userCaptcha = parseInt(document.getElementById('captcha-answer').value);
         const errorAlert = document.getElementById('error-alert');
-        const errorText = document.getElementById('error-text');
-        const btn = this;
+        const loginBtn = document.getElementById('login-btn');
 
-        // validation ساده
+        errorAlert.style.display = 'none';
+
         if (!username || !password) {
-            errorAlert.style.display = 'block';
-            errorText.textContent = 'لطفاً نام کاربری و رمز عبور را وارد کنید.';
+            showError('لطفاً نام کاربری و رمز عبور را وارد کنید.');
             return;
         }
 
-        // loading state
-        btn.disabled = true;
-        btn.querySelector('.normal-text').style.display = 'none';
-        btn.querySelector('.loading').style.display = 'inline';
-        errorAlert.style.display = 'none';
+        if (isNaN(userCaptcha) || userCaptcha !== captchaAnswer) {
+            showError('پاسخ تأیید امنیتی اشتباه است.');
+            generateCaptcha();
+            return;
+        }
 
-        // API call
+        loginBtn.disabled = true;
+        document.getElementById('btn-normal').style.display = 'none';
+        document.getElementById('btn-loading').style.display = 'inline';
+
         fetch('/api/v1/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ username, password })
         })
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
                 if (data.token) {
-                    // ذخیره token
+                    // موفق — پاک کردن تلاش‌های ناموفق
+                    localStorage.removeItem('login_fails');
+                    localStorage.removeItem('login_lock');
                     localStorage.setItem('erp_token', data.token);
                     localStorage.setItem('erp_user', JSON.stringify(data.user));
-                    // redirect به dashboard
                     window.location.href = '/dashboard';
                 } else {
-                    errorAlert.style.display = 'block';
-                    errorText.textContent = data.message || 'خطا در ورود';
-                    btn.disabled = false;
-                    btn.querySelector('.normal-text').style.display = 'inline';
-                    btn.querySelector('.loading').style.display = 'none';
+                    // ناموفق
+                    failedAttempts++;
+                    localStorage.setItem('login_fails', failedAttempts);
+
+                    if (failedAttempts >= 5) {
+                        const lockTime = Date.now() + (15 * 60 * 1000); // 15 دقیقه
+                        localStorage.setItem('login_lock', lockTime);
+                        lockUntil = lockTime;
+                        showError('پس از 5 تلاش ناموفق، حساب شما به مدت 15 دقیقه قفل شد.');
+                        loginBtn.disabled = true;
+                        checkLock();
+                    } else {
+                        const remaining = 5 - failedAttempts;
+                        showError(`نام کاربری یا رمز عبور اشتباه است. ${remaining} تلاش باقیمانده.`);
+                        loginBtn.disabled = false;
+                        document.getElementById('btn-normal').style.display = 'inline';
+                        document.getElementById('btn-loading').style.display = 'none';
+                        generateCaptcha();
+                    }
                 }
             })
             .catch(() => {
-                errorAlert.style.display = 'block';
-                errorText.textContent = 'خطا در ارتباط با سرور';
-                btn.disabled = false;
-                btn.querySelector('.normal-text').style.display = 'inline';
-                btn.querySelector('.loading').style.display = 'none';
+                showError('خطا در ارتباط با سرور');
+                loginBtn.disabled = false;
+                document.getElementById('btn-normal').style.display = 'inline';
+                document.getElementById('btn-loading').style.display = 'none';
             });
-    });
+    }
 
-    // Enter key
-    document.getElementById('password').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('login-btn').click();
-        }
+    document.getElementById('login-btn').addEventListener('click', doLogin);
+    document.getElementById('password').addEventListener('keypress', e => {
+        if (e.key === 'Enter') doLogin();
+    });
+    document.getElementById('captcha-answer').addEventListener('keypress', e => {
+        if (e.key === 'Enter') doLogin();
     });
 </script>
 </body>

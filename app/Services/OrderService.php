@@ -38,10 +38,12 @@ class OrderService
                 'status'           => 'pending',
                 'created_by'       => auth()->id(),
                 'order_number'     => $data['order_number'] ?? null,
+                'issue_date'       => $data['issue_date'] ?? now()->toDateString(),
                 'send_date'        => $data['send_date'] ?? null,
                 'freight_type_id'  => $data['freight_type_id'] ?? null,
                 'freight_amount'   => $data['freight_amount'] ?? 0,
                 'insurance_amount' => $data['insurance_amount'] ?? 0,
+                'payment_type'     => $data['payment_type'] ?? 'cash',
                 'payment_terms'    => $data['payment_terms'] ?? null,
                 'notes'            => $data['notes'] ?? null,
             ]);
@@ -49,10 +51,14 @@ class OrderService
             // آیتم‌ها
             foreach ($data['items'] as $item) {
                 $order->items()->create([
-                    'product_id'  => $item['product_id'],
-                    'quantity'    => $item['quantity'],
-                    'base_price'  => $item['price'],
-                    'final_price' => $item['price'] * $item['quantity'],
+                    'product_id'        => $item['product_id'],
+                    'quantity'          => $item['quantity'],
+                    'base_price'        => $item['price'],
+                    'final_price'       => $item['quantity'] * $item['price'],
+                    'amount'            => $item['amount'] ?? null,
+                    'packaging_type_id' => $item['packaging_type_id'] ?? null,
+                    'unit_id'           => $item['unit_id'] ?? null,
+                    'tax_percent'       => ($data['is_official'] ?? false) ? 10 : 0,
                 ]);
             }
 

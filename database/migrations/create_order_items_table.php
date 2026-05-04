@@ -15,7 +15,7 @@ return new class extends Migration
             $table->unsignedBigInteger('packaging_type_id')->nullable();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->integer('quantity')->default(1);
-            $table->decimal('amount', 15, 2)->default(0);
+            $table->decimal('amount', 15, 2)->nullable()->default(0);
             $table->decimal('base_price', 15, 2);
             $table->decimal('discount_percent', 5, 2)->default(0);
             $table->decimal('commission_percent', 5, 2)->default(0);

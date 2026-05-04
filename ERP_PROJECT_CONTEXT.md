@@ -674,3 +674,31 @@ production-ready رسیده است.
 ✔ صفحه جزئیات سفارش کامل شد
 ✔ برگ خروج پرینت اصلاح شد
 ✔ مجموع: 61 passed / 157 assertions
+
+
+
+---
+
+## 📍 Update – Math captcha
+
+✔ Math captcha با refresh اضافه شد
+✔ قفل شدن پس از 5 تلاش ناموفق (15 دقیقه)
+✔ شمارش معکوس تلاش‌های باقیمانده
+✔ Rate limiting در backend (throttle:5,15)
+✔ Log تلاش‌های ناموفق
+✔ Validation محکم‌تر در AuthController
+نتیجه: صفحه لاگین از چند لایه امنیتی برخوردار است
+
+
+
+---
+
+
+
+## 📍 Update 
+
+✔ OrderController::show با with کامل (freightType, packagingType, unit)
+✔ AuthController::logout اصلاح شد
+✔ AuthController::me با status اضافه شد
+✔ AuthTest پیام غیرفعال آپدیت شد
+✔ Tests: 61 passed / 157 assertions

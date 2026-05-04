@@ -73,7 +73,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(403)
-            ->assertJson(['message' => 'حساب کاربری غیرفعال است']);
+            ->assertJson(['message' => 'حساب کاربری شما غیرفعال است']);
     }
 
     #[Test]

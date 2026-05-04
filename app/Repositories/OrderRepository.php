@@ -11,18 +11,21 @@ class OrderRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function getOrderWithRelations(int $id)
+    public function getOrderWithRelations($id)
     {
-        return $this->model
-            ->with([
-                'customer',
-                'company',
-                'address',
-                'contact',
-                'items.product',
-                'sales.user',
-            ])
-            ->findOrFail($id);
+        return Order::with([
+            'customer',
+            'company',
+            'address',
+            'contact',
+            'items.product',
+            'items.packagingType',
+            'items.unit',
+            'sales.user',
+            'approvals.step',
+            'freightType',
+            'createdBy',
+        ])->findOrFail($id);
     }
 
     public function getPendingOrders()
